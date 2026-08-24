@@ -1,0 +1,1919 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oral Feedback Coach - GCE Paper 4 Rubric Evaluator</title>
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts: Inter & Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Chart.js for Radar Performance Chart -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Configure Tailwind CSS -->
+    <script>
+        window.tailwind = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        heading: ['Outfit', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f7ff',
+                            100: '#e0effe',
+                            300: '#7dd3fc',
+                            500: '#0284c7',
+                            600: '#0369a1',
+                            700: '#035388',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        }
+                    }
+                }
+            }
+        };
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        .recording-pulse {
+            animation: pulse-ring 1.5s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+        }
+        @keyframes pulse-ring {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(225, 29, 72, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 12px rgba(225, 29, 72, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(225, 29, 72, 0); }
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans min-h-screen flex flex-col">
+
+    <header class="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-50 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div class="bg-brand-600 text-white p-2 rounded-xl flex items-center justify-center shadow-lg shadow-brand-600/30">
+                    <i class="fa-solid fa-graduation-cap text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="font-heading font-bold text-lg leading-tight tracking-wide text-white">GCE Oral Rubric Evaluator</h1>
+                    <p class="text-xs text-slate-400 font-medium">Paper 4 Oral Communication • GCE O-Level (1184) & N(A)-Level (1190)</p>
+                </div>
+            </div>
+
+            <!-- Global Controls: Level Switcher & Topic Selector -->
+            <div class="flex items-center gap-3">
+                <!-- Teacher Dashboard Button with Badge -->
+                <button onclick="openTeacherModal()" class="relative bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs text-slate-200 px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-chalkboard-user text-teal-400"></i>
+                    <span class="hidden md:inline">Teacher Dashboard</span>
+                    <span id="teacherBadgeCount" class="ml-1 bg-teal-500 text-slate-950 font-bold px-1.5 py-0.2 text-[10px] rounded-full">0</span>
+                </button>
+
+                <!-- Level Selector Toggle -->
+                <div class="bg-slate-800 p-1 rounded-lg flex items-center border border-slate-700">
+                    <button id="btnLevelO" onclick="setLevel('O')" class="px-3 py-1.5 rounded-md text-xs font-bold transition text-white bg-brand-600 shadow-sm">
+                        O-Level (1184)
+                    </button>
+                    <button id="btnLevelN" onclick="setLevel('N')" class="px-3 py-1.5 rounded-md text-xs font-bold transition text-slate-400 hover:text-white">
+                        N(A)-Level (1190)
+                    </button>
+                </div>
+
+                <!-- Exam Topic Selector -->
+                <div class="relative hidden sm:block">
+                    <select id="topicSelector" onchange="loadTopic()" class="bg-slate-800 border border-slate-700 text-xs text-slate-200 rounded-lg px-3 py-2 pr-8 focus:outline-none focus:border-brand-500 font-medium appearance-none cursor-pointer">
+                        <option value="topic1">2024 Nov Day 1: Youth & Skate Park Recreation</option>
+                        <option value="topic2">2024 Nov Day 2: Nature Spots & Changi Jewel</option>
+                        <option value="topic3">2024 Nov Day 4: Waste Collection & Management</option>
+                        <option value="topic4">2024 Nov Day 5: Street Food Sellers & Hawker Culture</option>
+                        <option value="topic5">2024 Nov NA Day 2: School Orientation & Belonging</option>
+                        <option value="topic6">2024 Nov NA Day 5: Sports Pressure & Resilience</option>
+                    </select>
+                    <i class="fa-solid fa-chevron-down absolute right-2.5 top-3 text-slate-400 text-xs pointer-events-none"></i>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 flex flex-col gap-6">
+
+        <!-- Student Identification & Tracking Bar -->
+        <div class="bg-gradient-to-r from-slate-900 to-brand-900 rounded-2xl p-4 text-white shadow-md border border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-3 w-full sm:w-auto">
+                <div class="w-10 h-10 rounded-xl bg-teal-500/20 border border-teal-500/30 text-teal-300 flex items-center justify-center shrink-0">
+                    <i class="fa-solid fa-user-pen text-base"></i>
+                </div>
+                <div>
+                    <h3 class="font-heading font-bold text-sm leading-tight text-white">Candidate Tracking Details</h3>
+                    <p class="text-[11px] text-slate-300">Enter your profile information for diagnostic reporting and teacher recording.</p>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-3 w-full sm:w-auto">
+                <div class="flex-1 sm:w-56">
+                    <input id="candidateNameInput" type="text" oninput="updateCandidateInfo()" placeholder="Candidate Full Name *" class="w-full text-xs px-3 py-2 rounded-lg bg-slate-800/90 border border-slate-700 text-white placeholder-slate-400 focus:outline-none focus:border-teal-400 font-medium">
+                </div>
+                <div class="w-32">
+                    <input id="candidateClassInput" type="text" oninput="updateCandidateInfo()" placeholder="Class & Index *" class="w-full text-xs px-3 py-2 rounded-lg bg-slate-800/90 border border-slate-700 text-white placeholder-slate-400 focus:outline-none focus:border-teal-400 font-medium">
+                </div>
+                <span id="candidateStatusBadge" class="text-[11px] font-bold px-2.5 py-1 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                    <i class="fa-solid fa-circle-dot mr-1 text-[9px]"></i> Profile Pending
+                </span>
+            </div>
+        </div>
+
+        <!-- Topic Banner & Tab Navigation -->
+        <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+                <div class="flex items-center gap-2 mb-1">
+                    <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-brand-50 text-brand-700 border border-brand-100" id="currentLevelBadge">GCE Upper Sec O-Level 1184</span>
+                    <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200" id="totalMarksBadge">Paper 4 • Total 30 Marks</span>
+                </div>
+                <h2 id="topicTitle" class="text-xl font-heading font-bold text-slate-900">2024 Nov Day 1: Youth & Skate Park Recreation</h2>
+                <p id="topicSubtitle" class="text-xs text-slate-500 mt-0.5">Watch the video stimulus, complete preparation notes, and record your responses for rubric evaluation.</p>
+            </div>
+
+            <!-- Tab Stepper Bar -->
+            <div class="bg-slate-100 p-1.5 rounded-xl border border-slate-200 flex items-center gap-1 self-start md:self-auto">
+                <button id="tab1" onclick="switchTab('planned')" class="px-3.5 py-2 rounded-lg text-xs font-bold transition text-brand-700 bg-white shadow-sm flex items-center gap-2">
+                    <span class="w-5 h-5 rounded-full bg-brand-100 text-brand-700 flex items-center justify-center text-[10px] font-bold">1</span>
+                    <span>Planned Response (15m)</span>
+                </button>
+                <button id="tab2" onclick="switchTab('interaction')" class="px-3.5 py-2 rounded-lg text-xs font-bold transition text-slate-600 hover:text-slate-900 flex items-center gap-2">
+                    <span class="w-5 h-5 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center text-[10px] font-bold">2</span>
+                    <span>Spoken Interaction (15m)</span>
+                </button>
+                <button id="tab3" onclick="switchTab('report')" class="px-3.5 py-2 rounded-lg text-xs font-bold transition text-slate-600 hover:text-slate-900 flex items-center gap-2">
+                    <span class="w-5 h-5 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center text-[10px] font-bold"><i class="fa-solid fa-chart-line text-[9px]"></i></span>
+                    <span>Rubric Report</span>
+                </button>
+            </div>
+        </div>
+
+        <div id="sectionPlanned" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <!-- Left Column: Video Stimulus & Prompt (7 cols) -->
+            <div class="lg:col-span-7 flex flex-col gap-6">
+                <!-- Video Stimulus Card with Dynamic Link Support -->
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+                    <div class="bg-slate-900 px-4 py-3 text-white flex items-center justify-between">
+                        <div class="flex items-center gap-2 text-xs font-bold tracking-wide uppercase text-slate-300">
+                            <i class="fa-solid fa-video text-rose-400"></i> Video Stimulus (~1 Minute)
+                        </div>
+                        <button onclick="toggleVideoUrlInput()" title="Set Custom Backend Video URL" class="text-[11px] bg-slate-800 hover:bg-slate-700 text-teal-300 px-2.5 py-1 rounded border border-slate-700 transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-link text-xs"></i> Change Video Link
+                        </button>
+                    </div>
+
+                    <!-- Dynamic Backend Link Input Panel -->
+                    <div id="videoUrlPanel" class="hidden bg-slate-800 p-3 border-b border-slate-700 flex flex-col gap-2">
+                        <label class="text-[11px] font-semibold text-slate-300">Custom Video Source URL (Backend / Cloud Storage MP4):</label>
+                        <div class="flex gap-2">
+                            <input id="customVideoUrlInput" type="url" placeholder="https://your-server.com/video.mp4" class="flex-1 text-xs px-3 py-1.5 rounded bg-slate-900 border border-slate-700 text-white focus:outline-none focus:border-teal-400">
+                            <button onclick="applyCustomVideoUrl()" class="px-3 py-1.5 bg-teal-600 hover:bg-teal-500 text-white font-bold text-xs rounded transition">
+                                Apply
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="relative bg-black aspect-video flex items-center justify-center overflow-hidden" id="videoContainer">
+                        <!-- HTML5 Video Stream -->
+                        <video id="stimulusVideo" class="w-full h-full object-cover" controls poster="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&auto=format&fit=crop&q=60">
+                            <source id="videoSource" src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" type="video/mp4">
+                            Your browser does not support HTML video.
+                        </video>
+                    </div>
+
+                    <div class="p-4 bg-slate-50 border-t border-slate-200">
+                        <p class="text-xs text-slate-600 font-medium leading-relaxed" id="videoDescription">
+                            <strong>Context:</strong> This video clip shows young people skateboarding and doing tricks at a public skate park in Singapore.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Planned Response Prompt Card -->
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 flex flex-col gap-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2 text-xs font-bold text-brand-700 uppercase tracking-wider">
+                            <i class="fa-solid fa-clipboard-question text-base"></i> Part 1: Planned Response Prompt
+                        </div>
+                        <span class="text-[11px] font-bold text-slate-500 bg-slate-100 px-2.5 py-0.5 rounded-full border border-slate-200">Upper Sec Paper 4</span>
+                    </div>
+                    <div class="p-4 rounded-xl bg-brand-50/70 border border-brand-100">
+                        <p id="plannedPromptText" class="text-slate-800 font-semibold text-base leading-relaxed">
+                            "Would you recommend such a recreational activity for young people? Why, or why not?"
+                        </p>
+                    </div>
+                    
+                    <!-- PEEL Strategy Guide -->
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                        <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                            <i class="fa-solid fa-lightbulb text-amber-500"></i> Rubric Requirements (PEEL Framework)
+                        </h4>
+                        <div class="grid grid-cols-2 gap-2 text-xs">
+                            <div class="bg-white p-2 rounded border border-slate-200"><strong class="text-brand-700">P - Point:</strong> State clear stance directly answering prompt.</div>
+                            <div class="bg-white p-2 rounded border border-slate-200"><strong class="text-brand-700">E - Elaborate:</strong> Provide well-developed justifications.</div>
+                            <div class="bg-white p-2 rounded border border-slate-200"><strong class="text-brand-700">E - Evidence:</strong> Reference video clip / personal observation.</div>
+                            <div class="bg-white p-2 rounded border border-slate-200"><strong class="text-brand-700">L - Link:</strong> Conclude and tie back to prompt cleanly.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-5 flex flex-col gap-6">
+                <!-- Preparation Scratchpad -->
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 flex flex-col gap-3">
+                    <div class="flex items-center justify-between">
+                        <label for="prepNotes" class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-pen-to-square text-brand-600"></i> Candidate Preparation Notepad (10 Min Prep)
+                        </label>
+                        <span id="prepTimerDisplay" class="text-xs font-mono font-bold bg-slate-100 text-slate-700 px-2 py-0.5 rounded border border-slate-200">
+                            10:00
+                        </span>
+                    </div>
+                    <textarea id="prepNotes" rows="4" class="w-full text-xs p-3 font-mono rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-transparent resize-none custom-scrollbar" placeholder="Draft bullet points during prep time...&#10;- Point 1: Strongly recommend (Physical fitness & peer bonding)&#10;- Video Reference: Skaters encouraging each other&#10;- Counter-point: Safety gear required..."></textarea>
+                    <div class="flex items-center justify-between text-[11px] text-slate-500">
+                        <span><i class="fa-solid fa-circle-info"></i> Notes remain accessible during recording.</span>
+                        <button onclick="startPrepTimer()" id="btnPrepTimer" class="text-brand-600 font-bold hover:underline">Start Prep Timer</button>
+                    </div>
+                </div>
+
+                <!-- Speech Console -->
+                <div class="bg-slate-900 rounded-2xl border border-slate-800 shadow-xl p-6 text-white flex flex-col items-center justify-center text-center relative overflow-hidden">
+                    <div class="text-xs font-bold uppercase tracking-widest text-slate-400 mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-microphone-lines text-teal-400"></i> Speech Console & Speech-to-Text
+                    </div>
+
+                    <!-- Recording Ring -->
+                    <div id="plannedRecordRing" class="w-20 h-20 rounded-full bg-slate-800 border-2 border-slate-700 text-slate-400 flex items-center justify-center mb-3 transition-all duration-300">
+                        <i id="plannedMicIcon" class="fa-solid fa-microphone text-2xl"></i>
+                    </div>
+
+                    <!-- Timer Display -->
+                    <div id="plannedTimer" class="text-3xl font-mono font-extrabold tracking-tight text-white mb-1">00:00</div>
+                    <p id="plannedHintText" class="text-xs text-slate-400 max-w-xs mb-4">Press Record when ready. Speech will be transcribed for rubric evaluation.</p>
+
+                    <!-- Live Transcript Output Box -->
+                    <div class="w-full text-left mb-4 bg-slate-950 p-3 rounded-xl border border-slate-800">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-[10px] font-bold text-teal-400 uppercase tracking-wider"><i class="fa-solid fa-quote-left mr-1"></i> Live Audio Transcript</span>
+                            <span id="sttStatusPlanned" class="text-[10px] text-slate-500">Speech-to-Text Active</span>
+                        </div>
+                        <textarea id="transcriptPlanned" rows="3" class="w-full bg-transparent text-xs text-slate-200 focus:outline-none resize-none custom-scrollbar font-mono leading-relaxed" placeholder="Your spoken speech transcript will appear here in real time. You can also edit or refine text directly..."></textarea>
+                    </div>
+
+                    <!-- Control Action Buttons -->
+                    <div class="w-full flex flex-col gap-2">
+                        <button id="btnRecordPlanned" onclick="togglePlannedRecord()" class="w-full py-3.5 px-4 bg-teal-600 hover:bg-teal-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-teal-600/30 flex items-center justify-center gap-2 transition cursor-pointer">
+                            <i class="fa-solid fa-circle text-xs"></i> <span id="lblRecordPlanned">Record Planned Response</span>
+                        </button>
+                        
+                        <button id="btnProceedInteraction" onclick="switchTab('interaction')" disabled class="w-full py-2.5 px-4 bg-slate-800 text-slate-500 font-bold text-xs rounded-xl flex items-center justify-center gap-2 transition cursor-not-allowed">
+                            <span>Proceed to Part 2: Spoken Interaction</span> <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="sectionInteraction" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <!-- Questions List (7 cols) -->
+            <div class="lg:col-span-7 flex flex-col gap-4">
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-2">
+                            <span class="w-7 h-7 rounded-lg bg-brand-100 text-brand-700 flex items-center justify-center font-bold text-sm">2</span>
+                            <h3 class="font-heading font-bold text-slate-900 text-base">Part 2: Spoken Interaction</h3>
+                        </div>
+                        <span class="text-xs font-bold text-brand-600 bg-brand-50 px-2.5 py-1 rounded-full border border-brand-100">15 Marks</span>
+                    </div>
+                    <p class="text-xs text-slate-500 mb-4">Engage in conversation extending from the stimulus topic. Answer both questions to complete evaluation.</p>
+
+                    <!-- Question 1 -->
+                    <div id="q1Card" onclick="selectQuestion(1)" class="p-4 rounded-xl border-2 border-brand-500 bg-brand-50/50 mb-3 transition cursor-pointer hover:border-brand-600">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-bold text-brand-800 uppercase tracking-wider">Question 1 (Personal Experience & Application)</span>
+                            <span id="q1Status" class="text-xs font-bold text-amber-600"><i class="fa-regular fa-clock"></i> Pending</span>
+                        </div>
+                        <p id="q1Text" class="text-sm font-semibold text-slate-800 leading-relaxed">
+                            "If you were to design a recreational area for young people, what would it look like and why?"
+                        </p>
+                    </div>
+
+                    <!-- Question 2 -->
+                    <div id="q2Card" onclick="selectQuestion(2)" class="p-4 rounded-xl border border-slate-200 bg-slate-50 transition opacity-60 cursor-not-allowed">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Question 2 (Broader Societal Issues & Critical Thinking)</span>
+                            <span id="q2Status" class="text-xs font-bold text-slate-400"><i class="fa-solid fa-lock text-slate-400 mr-1"></i> Hidden until Q1 recorded</span>
+                        </div>
+                        <p id="q2Text" class="text-sm font-semibold text-slate-800 leading-relaxed">
+                            <span class="italic text-slate-400 font-normal"><i class="fa-solid fa-eye-slash mr-1"></i> Question 2 prompt is concealed. Record your answer to Question 1 to reveal.</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active Question Response Console (5 cols) -->
+            <div class="lg:col-span-5 flex flex-col gap-6">
+                <div class="bg-slate-900 rounded-2xl border border-slate-800 shadow-xl p-6 text-white flex flex-col items-center justify-center text-center">
+                    <span id="activeQBadge" class="px-3 py-1 rounded-full bg-slate-800 text-teal-400 text-xs font-mono font-bold mb-3 border border-slate-700">
+                        Answering Question 1
+                    </span>
+
+                    <div id="qRecordingRing" class="w-20 h-20 rounded-full bg-slate-800 border-2 border-slate-700 text-slate-400 flex items-center justify-center mb-3 transition-all duration-300">
+                        <i id="qMicIcon" class="fa-solid fa-microphone text-2xl"></i>
+                    </div>
+
+                    <div id="qTimer" class="text-3xl font-mono font-extrabold tracking-tight text-white mb-1">00:00</div>
+                    <p id="qHintText" class="text-xs text-slate-400 max-w-xs mb-4">Press record when ready to speak your response to Question 1.</p>
+
+                    <!-- Live Question Transcript Display -->
+                    <div class="w-full text-left mb-4 bg-slate-950 p-3 rounded-xl border border-slate-800">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-[10px] font-bold text-teal-400 uppercase tracking-wider"><i class="fa-solid fa-quote-left mr-1"></i> Q1 Spoken Transcript</span>
+                        </div>
+                        <textarea id="transcriptQ1" rows="3" class="w-full bg-transparent text-xs text-slate-200 focus:outline-none resize-none custom-scrollbar font-mono leading-relaxed" placeholder="Spoken transcript for Question 1 will be captured here..."></textarea>
+                    </div>
+
+                    <div class="w-full text-left mb-4 bg-slate-950 p-3 rounded-xl border border-slate-800 hidden" id="q2TranscriptBox">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-[10px] font-bold text-teal-400 uppercase tracking-wider"><i class="fa-solid fa-quote-left mr-1"></i> Q2 Spoken Transcript</span>
+                        </div>
+                        <textarea id="transcriptQ2" rows="3" class="w-full bg-transparent text-xs text-slate-200 focus:outline-none resize-none custom-scrollbar font-mono leading-relaxed" placeholder="Spoken transcript for Question 2 will be captured here..."></textarea>
+                    </div>
+
+                    <div class="w-full flex flex-col gap-2">
+                        <button id="btnRecordQ" onclick="toggleQuestionRecord()" class="w-full py-3.5 px-4 bg-teal-600 hover:bg-teal-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-teal-600/30 flex items-center justify-center gap-2 transition cursor-pointer">
+                            <i class="fa-solid fa-circle text-xs"></i> <span id="lblRecordQ">Record Answer to Q1</span>
+                        </button>
+                        
+                        <button id="btnNextQ" onclick="advanceQuestion()" disabled class="w-full py-2.5 px-4 bg-slate-800 text-slate-500 font-bold text-xs rounded-xl flex items-center justify-center gap-2 transition cursor-not-allowed">
+                            <span id="lblNextQ">Next Question</span> <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="sectionReport" class="hidden flex flex-col gap-6">
+            <div id="reportEmptyState" class="bg-white rounded-2xl border border-slate-200 shadow-sm p-8 sm:p-12 text-center flex flex-col items-center justify-center">
+                <div class="w-16 h-16 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center text-2xl mb-4 border border-brand-100">
+                    <i class="fa-solid fa-microphone-slash"></i>
+                </div>
+                <h3 class="text-xl font-heading font-bold text-slate-900 mb-2">No Speech Transcribed Yet</h3>
+                <p class="text-xs sm:text-sm text-slate-500 max-w-md mb-6 leading-relaxed">
+                    To perform an accurate Rubric evaluation, record your voice or enter your response transcripts in Part 1 or Part 2.
+                </p>
+                <div class="flex flex-wrap items-center justify-center gap-3">
+                    <button onclick="switchTab('planned')" class="px-5 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs shadow-md transition flex items-center gap-2">
+                        <i class="fa-solid fa-microphone"></i> Start Part 1 Recording
+                    </button>
+                    <button onclick="loadDemoReport()" class="px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 font-bold text-xs transition flex items-center gap-2">
+                        <i class="fa-solid fa-eye"></i> Load Sample Candidate Evaluation
+                    </button>
+                </div>
+            </div>
+
+            <!-- Full Report Content -->
+            <div id="reportContent" class="hidden flex flex-col gap-6">
+                <!-- Overall Score Banner -->
+                <div class="bg-gradient-to-r from-slate-900 via-brand-900 to-slate-900 text-white rounded-2xl p-6 shadow-xl border border-slate-800 flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div class="flex items-center gap-5">
+                        <div class="relative flex items-center justify-center w-24 h-24 rounded-2xl bg-white/10 backdrop-blur border border-white/20">
+                            <div class="text-center">
+                                <span id="scoreTotal" class="text-3xl font-extrabold font-heading text-teal-300">24</span>
+                                <span class="text-xs font-bold text-slate-300 block border-t border-white/20 mt-0.5 pt-0.5">/ 30 Marks</span>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2 mb-1">
+                                <span id="rubricBandTag" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-400/20 text-emerald-300 border border-emerald-400/30">
+                                    Band 4 (Well-Developed & Generally Fluent)
+                                </span>
+                                <span id="reportCandidateBadge" class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-300 border border-slate-700">
+                                    Candidate: Unspecified
+                                </span>
+                            </div>
+                            <h3 class="text-2xl font-heading font-bold text-white">Paper 4 Diagnostic Oral Report</h3>
+                            <p id="reportSyllabusText" class="text-xs text-slate-300 mt-1 max-w-lg">Evaluated strictly against Upper Sec Mark Sheet Band Descriptors.</p>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex flex-wrap items-center gap-2">
+                        <button onclick="openSubmitModal()" class="px-4 py-2.5 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold text-xs shadow-lg shadow-teal-500/20 flex items-center gap-1.5 transition">
+                            <i class="fa-solid fa-paper-plane"></i> Submit to Teacher
+                        </button>
+                        <button onclick="copySummaryToClipboard()" class="px-3.5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold text-xs flex items-center gap-1.5 transition">
+                            <i class="fa-solid fa-copy"></i> Copy Summary
+                        </button>
+                        <button onclick="window.print()" class="px-3.5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold text-xs flex items-center gap-1.5 transition">
+                            <i class="fa-solid fa-print"></i> PDF / Print
+                        </button>
+                        <button onclick="generateFullReport()" class="px-3.5 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-bold text-xs flex items-center gap-1.5 transition" title="Re-evaluate Transcripts">
+                            <i class="fa-solid fa-arrows-rotate"></i> Re-assess
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Quick Metric Cards -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col">
+                        <span class="text-[11px] font-bold text-slate-400 uppercase">Words Per Minute</span>
+                        <span id="metricWpm" class="text-2xl font-extrabold text-slate-800 font-heading">125 WPM</span>
+                        <span id="metricWpmStatus" class="text-[10px] text-emerald-600 font-semibold mt-1"><i class="fa-solid fa-circle-check"></i> Optimal Pace (110-140)</span>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col">
+                        <span class="text-[11px] font-bold text-slate-400 uppercase">Filler Word Frequency</span>
+                        <span id="metricFillers" class="text-2xl font-extrabold text-slate-800 font-heading">2 Fillers</span>
+                        <span id="metricFillerStatus" class="text-[10px] text-emerald-600 font-semibold mt-1"><i class="fa-solid fa-circle-check"></i> High Delivery Control</span>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col">
+                        <span class="text-[11px] font-bold text-slate-400 uppercase">PEEL Structure Score</span>
+                        <span id="metricPeel" class="text-2xl font-extrabold text-brand-600 font-heading">3 / 4 Met</span>
+                        <span id="metricPeelStatus" class="text-[10px] text-amber-600 font-semibold mt-1"><i class="fa-solid fa-circle-exclamation"></i> Link back to prompt</span>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col">
+                        <span class="text-[11px] font-bold text-slate-400 uppercase">Total Spoken Words</span>
+                        <span id="metricWordCount" class="text-2xl font-extrabold text-slate-800 font-heading">210 Words</span>
+                        <span id="metricWordCountStatus" class="text-[10px] text-emerald-600 font-semibold mt-1"><i class="fa-solid fa-circle-check"></i> Adequate Development</span>
+                    </div>
+                </div>
+
+                <!-- Comprehensive Component Breakdown & Radar -->
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+                    <!-- Main Score Table & Feedback (7 cols) -->
+                    <div class="md:col-span-7 flex flex-col gap-6">
+                        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 flex flex-col">
+                            <h4 class="font-heading font-bold text-slate-900 text-sm mb-4 uppercase tracking-wider flex items-center gap-2">
+                                <i class="fa-solid fa-list-check text-brand-600"></i> Mark Sheet Component Scores
+                            </h4>
+                            
+                            <div class="space-y-4">
+                                <!-- Part 1: Planned Response - Response Criteria (10 Marks) -->
+                                <div class="p-4 rounded-xl bg-slate-50 border border-slate-200">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <span class="font-bold text-xs text-slate-800">Part 1: Response & Development (10m)</span>
+                                        <span id="scoreResponse" class="font-extrabold text-sm text-brand-700">8 / 10</span>
+                                    </div>
+                                    <div class="w-full bg-slate-200 rounded-full h-2 mb-2">
+                                        <div id="barResponse" class="bg-brand-600 h-2 rounded-full" style="width: 80%"></div>
+                                    </div>
+                                    <p id="feedbackResponse" class="text-xs text-slate-600 leading-relaxed">Analyzing response...</p>
+                                </div>
+
+                                <!-- Part 1: Planned Response - Delivery Criteria (5 Marks) -->
+                                <div class="p-4 rounded-xl bg-slate-50 border border-slate-200">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <span class="font-bold text-xs text-slate-800">Part 1: Delivery, Pronunciation & Intonation (5m)</span>
+                                        <span id="scoreDelivery" class="font-extrabold text-sm text-amber-700">4 / 5</span>
+                                    </div>
+                                    <div class="w-full bg-slate-200 rounded-full h-2 mb-2">
+                                        <div id="barDelivery" class="bg-amber-600 h-2 rounded-full" style="width: 80%"></div>
+                                    </div>
+                                    <p id="feedbackDelivery" class="text-xs text-slate-600 leading-relaxed">Analyzing delivery...</p>
+                                </div>
+
+                                <!-- Part 2: Spoken Interaction (15 Marks) -->
+                                <div class="p-4 rounded-xl bg-slate-50 border border-slate-200">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <span class="font-bold text-xs text-slate-800">Part 2: Spoken Interaction Perspective & Range (15m)</span>
+                                        <span id="scoreInteraction" class="font-extrabold text-sm text-teal-700">12 / 15</span>
+                                    </div>
+                                    <div class="w-full bg-slate-200 rounded-full h-2 mb-2">
+                                        <div id="barInteraction" class="bg-teal-600 h-2 rounded-full" style="width: 80%"></div>
+                                    </div>
+                                    <p id="feedbackInteraction" class="text-xs text-slate-600 leading-relaxed">Analyzing interaction...</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Vocabulary & Expression Upgrades -->
+                        <div class="p-5 rounded-2xl bg-amber-50/70 border border-amber-200 shadow-sm">
+                            <h5 class="text-xs font-bold text-amber-900 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                                <i class="fa-solid fa-wand-magic-sparkles text-amber-600"></i> Dynamic Vocabulary & Phrase Upgrades
+                            </h5>
+                            <ul id="vocabUpgrades" class="text-xs text-amber-900 space-y-2">
+                                <li>• Replace <em>"it is good for young people"</em> &rarr; <strong>"engaging in active recreation promotes holistic well-being"</strong></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Diagnostic Competency Radar (5 cols) -->
+                    <div class="md:col-span-5 bg-white rounded-2xl border border-slate-200 shadow-sm p-6 flex flex-col items-center justify-between">
+                        <div class="w-full">
+                            <h4 class="font-heading font-bold text-slate-900 text-sm mb-1 uppercase tracking-wider flex items-center gap-2">
+                                <i class="fa-solid fa-chart-radar text-brand-600"></i> Performance Radar
+                            </h4>
+                            <p class="text-[11px] text-slate-500 mb-4">Competency mapping across official rubric domains</p>
+                        </div>
+                        <div class="w-full aspect-square max-w-[280px]">
+                            <canvas id="radarChart"></canvas>
+                        </div>
+                        <div class="w-full mt-4 p-3 rounded-xl bg-slate-50 border border-slate-200 text-[11px] text-slate-600">
+                            <strong>Syllabus Target:</strong> Aim for balanced competency in both structured preparation (Part 1) and spontaneous conversation (Part 2).
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 flex flex-col gap-6">
+                    <h4 class="font-heading font-bold text-slate-900 text-base uppercase tracking-wider flex items-center gap-2">
+                        <i class="fa-solid fa-magnifying-glass-chart text-teal-600"></i> Detailed Component Feedback & Steps to Improve
+                    </h4>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Planned Response Specific Feedback -->
+                        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 flex flex-col gap-2">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-bold text-brand-800 uppercase"><i class="fa-solid fa-comment-dots mr-1"></i> Planned Response (PR) Analysis</span>
+                                <span id="badgePrDetail" class="text-[10px] font-bold px-2 py-0.5 rounded bg-brand-100 text-brand-800">Content & Organization</span>
+                            </div>
+                            <div class="text-xs text-slate-700 leading-relaxed space-y-2">
+                                <div><strong class="text-slate-900">Strengths:</strong> <span id="prStrength">Clear expression of initial stance in response to the prompt.</span></div>
+                                <div><strong class="text-slate-900">Key Area for Growth:</strong> <span id="prGrowth">Deepen elaboration by connecting video observations directly to personal reasons.</span></div>
+                                <div class="bg-white p-2.5 rounded-lg border border-slate-200 font-mono text-[11px] text-brand-900">
+                                    <strong class="block text-brand-700 font-sans font-bold mb-0.5">Recommended Step to Improve:</strong>
+                                    <span id="prStep">Ensure you explicitly mention at least 2 distinct details from the video clip (e.g., skater interactions, safety equipment) to anchor your argument.</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Delivery Specific Feedback -->
+                        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 flex flex-col gap-2">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-bold text-amber-800 uppercase"><i class="fa-solid fa-volume-high mr-1"></i> Delivery & Rhythm Analysis</span>
+                                <span id="badgeDelivDetail" class="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-800">Fluency & Intonation</span>
+                            </div>
+                            <div class="text-xs text-slate-700 leading-relaxed space-y-2">
+                                <div><strong class="text-slate-900">Strengths:</strong> <span id="delivStrength">Consistent pacing and intelligible pronunciation throughout speech.</span></div>
+                                <div><strong class="text-slate-900">Key Area for Growth:</strong> <span id="delivGrowth">Vary vocal intonation to highlight key persuasive arguments.</span></div>
+                                <div class="bg-white p-2.5 rounded-lg border border-slate-200 font-mono text-[11px] text-amber-900">
+                                    <strong class="block text-amber-700 font-sans font-bold mb-0.5">Recommended Step to Improve:</strong>
+                                    <span id="delivStep">Pause briefly before major transition words (e.g., 'Furthermore', 'Consequently') and emphasize key adjectives.</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Spoken Interaction Question 1 Specific Feedback -->
+                        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 flex flex-col gap-2">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-bold text-teal-800 uppercase"><i class="fa-solid fa-user-gear mr-1"></i> Question 1 (Personal Application)</span>
+                                <span id="badgeQ1Detail" class="text-[10px] font-bold px-2 py-0.5 rounded bg-teal-100 text-teal-800">Spoken Interaction</span>
+                            </div>
+                            <div class="text-xs text-slate-700 leading-relaxed space-y-2">
+                                <div><strong class="text-slate-900">Strengths:</strong> <span id="q1Strength">Directly answers prompt using relatable personal context.</span></div>
+                                <div><strong class="text-slate-900">Key Area for Growth:</strong> <span id="q1Growth">Expand on practical details and specific benefits in your proposed solution.</span></div>
+                                <div class="bg-white p-2.5 rounded-lg border border-slate-200 font-mono text-[11px] text-teal-900">
+                                    <strong class="block text-teal-700 font-sans font-bold mb-0.5">Recommended Step to Improve:</strong>
+                                    <span id="q1Step">Use the 'PREP' method (Point, Reason, Example, Point) to add concrete real-life examples to your response.</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Spoken Interaction Question 2 Specific Feedback -->
+                        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 flex flex-col gap-2">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-bold text-indigo-800 uppercase"><i class="fa-solid fa-earth-singapore mr-1"></i> Question 2 (Societal Perspective)</span>
+                                <span id="badgeQ2Detail" class="text-[10px] font-bold px-2 py-0.5 rounded bg-indigo-100 text-indigo-800">Critical Thinking</span>
+                            </div>
+                            <div class="text-xs text-slate-700 leading-relaxed space-y-2">
+                                <div><strong class="text-slate-900">Strengths:</strong> <span id="q2Strength">Acknowledges broader community or societal dimensions of the topic.</span></div>
+                                <div><strong class="text-slate-900">Key Area for Growth:</strong> <span id="q2Growth">Consider multiple contrasting viewpoints (e.g., individual vs. community/government level).</span></div>
+                                <div class="bg-white p-2.5 rounded-lg border border-slate-200 font-mono text-[11px] text-indigo-900">
+                                    <strong class="block text-indigo-700 font-sans font-bold mb-0.5">Recommended Step to Improve:</strong>
+                                    <span id="q2Step">Incorporate discourse markers like 'On the one hand... On the other hand...' to show balanced evaluation.</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Target Action Plan -->
+                    <div class="bg-gradient-to-r from-teal-900 to-slate-900 rounded-xl p-5 text-white flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <div>
+                            <span class="text-[10px] font-bold tracking-widest text-teal-300 uppercase block mb-1">Grade Upgrade Roadmap</span>
+                            <h5 class="text-base font-heading font-bold" id="actionPlanHeader">Action Steps to Reach Band 5 (25 - 30 Marks)</h5>
+                            <p class="text-xs text-slate-300 mt-1 max-w-2xl" id="actionPlanBody">Focus on expanding vocabulary range with sophisticated collocations, sustaining discussion naturally without examiner prompts, and linking personal experiences to wider societal trends.</p>
+                        </div>
+                        <button onclick="switchTab('planned')" class="px-4 py-2 bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold text-xs rounded-xl shrink-0 transition">
+                            Practice Next Cycle <i class="fa-solid fa-arrow-right ml-1"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Student Submission Modal -->
+    <div id="submitModal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-md w-full overflow-hidden">
+            <div class="bg-slate-900 px-6 py-4 text-white flex items-center justify-between">
+                <div class="flex items-center gap-2 font-heading font-bold text-sm">
+                    <i class="fa-solid fa-paper-plane text-teal-400"></i> Submit Performance to Teacher
+                </div>
+                <button onclick="closeSubmitModal()" class="text-slate-400 hover:text-white transition">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            
+            <form onsubmit="handleStudentSubmit(event)" class="p-6 flex flex-col gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Student Full Name *</label>
+                    <input id="inputStudentName" type="text" required placeholder="e.g., Tan Ah Kow / Clarissa Lim" class="w-full text-xs p-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-transparent font-medium">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Class & Index Number *</label>
+                    <input id="inputStudentClass" type="text" required placeholder="e.g., Sec 4-4 (28)" class="w-full text-xs p-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-transparent font-medium">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Optional Candidate Reflection</label>
+                    <textarea id="inputStudentReflection" rows="2" placeholder="e.g., Felt confident in PR, need to reduce filler words in Q2." class="w-full text-xs p-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-transparent resize-none"></textarea>
+                </div>
+
+                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs text-slate-600 space-y-1">
+                    <div class="flex justify-between"><span>Syllabus Level:</span> <strong id="modalLevelText">O-Level (1184)</strong></div>
+                    <div class="flex justify-between"><span>Topic:</span> <strong id="modalTopicText" class="truncate max-w-[200px]">Skate Park</strong></div>
+                    <div class="flex justify-between"><span>Diagnostic Score:</span> <strong id="modalScoreText" class="text-teal-600 font-bold">24 / 30 Marks</strong></div>
+                </div>
+
+                <div class="flex gap-2 pt-2">
+                    <button type="button" onclick="closeSubmitModal()" class="w-1/2 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition">
+                        Cancel
+                    </button>
+                    <button type="submit" id="btnConfirmSubmit" class="w-1/2 py-2.5 bg-teal-600 hover:bg-teal-500 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-cloud-arrow-up"></i> Send Submission
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Teacher Dashboard Modal -->
+    <div id="teacherModal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-5xl w-full h-[88vh] flex flex-col overflow-hidden">
+            <div class="bg-slate-900 px-6 py-4 text-white flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-teal-500/20 border border-teal-500/30 text-teal-300 flex items-center justify-center">
+                        <i class="fa-solid fa-chalkboard-user text-lg"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-heading font-bold text-base leading-none">Teacher Tracking & Review Dashboard</h3>
+                        <p class="text-[11px] text-slate-400 mt-1">Review candidate oral submissions, transcripts, AI rubric diagnostics, and feedback</p>
+                    </div>
+                </div>
+                <button onclick="closeTeacherModal()" class="text-slate-400 hover:text-white transition">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+
+            <!-- Dashboard Controls & Filter Bar -->
+            <div class="p-4 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3">
+                <div class="relative flex-1 min-w-[240px]">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400 text-xs"></i>
+                    <input id="teacherSearchInput" oninput="filterTeacherSubmissions()" type="text" placeholder="Search student name, class, or index..." class="w-full text-xs pl-8 pr-3 py-2 rounded-lg border border-slate-300 focus:outline-none focus:border-brand-500 font-medium">
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <button onclick="seedDemoSubmissions()" class="px-3.5 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 rounded-lg text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
+                        <i class="fa-solid fa-users text-xs"></i> Seed Sample Class Submissions
+                    </button>
+
+                    <button onclick="clearAllTeacherSubmissions()" class="px-3 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-lg text-xs font-bold transition flex items-center gap-1">
+                        <i class="fa-solid fa-trash-can text-xs"></i> Clear All
+                    </button>
+
+                    <button onclick="fetchTeacherSubmissions()" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-xs font-bold transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-rotate text-xs"></i> Refresh
+                    </button>
+                </div>
+            </div>
+
+            <!-- Submissions List Container -->
+            <div id="teacherSubmissionsContainer" class="flex-1 overflow-y-auto p-4 sm:p-6 custom-scrollbar space-y-4 bg-slate-100">
+                <div class="text-center py-12 text-slate-400 text-xs">
+                    <i class="fa-solid fa-spinner fa-spin text-2xl mb-2 block"></i> Loading student submissions...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toastMessage" class="fixed bottom-6 right-6 z-50 bg-slate-900 text-white text-xs font-medium px-4 py-3 rounded-xl shadow-xl border border-slate-700 hidden items-center gap-2">
+        <i id="toastIcon" class="fa-solid fa-circle-check text-teal-400"></i>
+        <span id="toastText">Action completed successfully.</span>
+    </div>
+
+    <script>
+        // Official Verified Exam Topics & Phrasing (1184 O-Level & 1190 N(A)-Level)
+        const EXAM_TOPICS = {
+            'topic1': {
+                level: 'O',
+                title: '2024 Nov Day 1: Youth & Skate Park Recreation',
+                subtitle: 'Watch the 1-minute video stimulus, complete your 10-minute preparation notes, then record your planned response and interaction.',
+                videoDescription: 'Context: This video clip shows young people skateboarding and doing tricks at a public skate park in Singapore.',
+                plannedPrompt: '"Would you recommend such a recreational activity for young people? Why, or why not?"',
+                q1Prompt: '"If you were to design a recreational area for young people, what would it look like and why?"',
+                q2Prompt: '"People have less time for recreation nowadays. How far do you agree?"',
+                videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
+                keywords: ['skate', 'skateboarding', 'youth', 'recreation', 'park', 'community', 'exercise', 'resilience', 'safety', 'helmet', 'discipline', 'camaraderie']
+            },
+            'topic2': {
+                level: 'O',
+                title: '2024 Nov Day 2: Nature Spots & Changi Jewel',
+                subtitle: 'Watch the video clip of indoor nature features, prepare your arguments, and respond to the examiner.',
+                videoDescription: 'Context: This video shows the indoor waterfall fountain and surrounding lush indoor greenery in Changi Jewel.',
+                plannedPrompt: '"Should there be more of such nature-themed spots as shown in the video? Why, or why not?"',
+                q1Prompt: '"What can be done to encourage teenagers to spend more time in nature?"',
+                q2Prompt: '"Do you agree that young people can do more to protect nature? Why do you say so?"',
+                videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
+                keywords: ['nature', 'jewel', 'greenery', 'waterfall', 'environment', 'sustainability', 'relaxation', 'biodiversity', 'urban', 'flora', 'conservation']
+            },
+            'topic3': {
+                level: 'O',
+                title: '2024 Nov Day 4: Waste Collection & Management',
+                subtitle: 'Analyze the garbage collection process shown in the video and present your planned response.',
+                videoDescription: 'Context: This video shows rubbish being collected by a garbage truck with sanitation workers operating machinery.',
+                plannedPrompt: '"Is this a good way to collect and manage waste? Why or why not?"',
+                q1Prompt: '"What can people do to reduce waste?"',
+                q2Prompt: '"Why do you think we should be concerned about waste reduction? Explain your view."',
+                videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
+                keywords: ['waste', 'rubbish', 'garbage', 'recycling', 'sanitation', 'cleanliness', 'environment', 'efficiency', 'landfill', 'semakau', 'sustainability']
+            },
+            'topic4': {
+                level: 'O',
+                title: '2024 Nov Day 5: Street Food Sellers & Hawker Culture',
+                subtitle: 'Watch the street food vendor clip and evaluate hawker culture and career trends.',
+                videoDescription: 'Context: This video clip shows a street hawker preparing fresh fruit juice at a food stall.',
+                plannedPrompt: '"Should we have such street food sellers in Singapore? Why or why not?"',
+                q1Prompt: '"Do you agree that people are eating out more often these days? Why do you say so?"',
+                q2Prompt: '"Few young people are interested in becoming hawkers nowadays. How far do you agree with this view?"',
+                videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4',
+                keywords: ['hawker', 'food', 'street', 'culture', 'heritage', 'hygiene', 'affordable', 'tradition', 'unesco', 'culinary', 'convenience']
+            },
+            'topic5': {
+                level: 'N',
+                title: '2024 Nov NA Day 2: School Orientation & Belonging',
+                subtitle: 'GCE N(A)-Level 1190: Evaluate mass orientation activities and school identity.',
+                videoDescription: 'Context: This video shows students participating in a mass dance activity as part of school orientation.',
+                plannedPrompt: '"What are the benefits of having such an activity as part of school orientation?"',
+                q1Prompt: '"What other ways are there to help students develop a sense of belonging to their schools?"',
+                q2Prompt: '"How important is it for young people to have a sense of belonging to their country? Why do you say so?"',
+                videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyshakes.mp4',
+                keywords: ['orientation', 'school', 'belonging', 'friendship', 'icebreaker', 'community', 'identity', 'pride', 'activities', 'unity', 'culture']
+            },
+            'topic6': {
+                level: 'N',
+                title: '2024 Nov NA Day 5: Sports Pressure & Resilience',
+                subtitle: 'GCE N(A)-Level 1190: Discuss managing stress and building resilience under high pressure.',
+                videoDescription: 'Context: This video shows a tennis player struggling to land a first serve during a competitive match.',
+                plannedPrompt: '"What are some ways to manage stress in situations like this?"',
+                q1Prompt: '"Do you think that attitude is more important than skill in competitions? Why or why not?"',
+                q2Prompt: '"Some people say young people are less strong and resilient these days. What are your views?"',
+                videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4',
+                keywords: ['stress', 'pressure', 'resilience', 'sports', 'competition', 'mental health', 'perseverance', 'attitude', 'mindset', 'coping']
+            }
+        };
+
+        // Application State
+        let currentLevel = 'O';
+        let currentTopicKey = 'topic1';
+        let currentTab = 'planned';
+
+        let candidateName = '';
+        let candidateClass = '';
+
+        let hasRecordedPlanned = false;
+        let hasRecordedQuestions = false;
+        let isDemoReport = false;
+
+        // Speech Recognition instances
+        let speechRecognizerPlanned = null;
+        let speechRecognizerQ = null;
+
+        // Timers & Audio State
+        let prepTimerInterval = null;
+        let prepTimeSeconds = 600;
+
+        let plannedTimerInterval = null;
+        let plannedTimeSeconds = 0;
+        let isRecordingPlanned = false;
+        let plannedMediaRecorder = null;
+
+        let activeQuestionNum = 1;
+        let isRecordingQuestion = false;
+        let questionMediaRecorder = null;
+        let questionTimerInterval = null;
+        let questionTimeSeconds = 0;
+
+        let radarChartInstance = null;
+
+        function updateCandidateInfo() {
+            const nameInput = document.getElementById('candidateNameInput');
+            const classInput = document.getElementById('candidateClassInput');
+            const badge = document.getElementById('candidateStatusBadge');
+
+            candidateName = nameInput ? nameInput.value.trim() : '';
+            candidateClass = classInput ? classInput.value.trim() : '';
+
+            // Sync to submit modal
+            const mName = document.getElementById('inputStudentName');
+            const mClass = document.getElementById('inputStudentClass');
+            if (mName && candidateName && !mName.value) mName.value = candidateName;
+            if (mClass && candidateClass && !mClass.value) mClass.value = candidateClass;
+
+            if (badge) {
+                if (candidateName && candidateClass) {
+                    badge.className = 'text-[11px] font-bold px-2.5 py-1 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
+                    badge.innerHTML = '<i class="fa-solid fa-circle-check mr-1 text-[9px]"></i> Profile Ready';
+                } else {
+                    badge.className = 'text-[11px] font-bold px-2.5 py-1 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/30';
+                    badge.innerHTML = '<i class="fa-solid fa-circle-dot mr-1 text-[9px]"></i> Profile Pending';
+                }
+            }
+        }
+
+        function toggleVideoUrlInput() {
+            const panel = document.getElementById('videoUrlPanel');
+            if (panel) panel.classList.toggle('hidden');
+        }
+
+        function applyCustomVideoUrl() {
+            const input = document.getElementById('customVideoUrlInput');
+            const videoElem = document.getElementById('stimulusVideo');
+            const videoSource = document.getElementById('videoSource');
+
+            if (input && input.value.trim()) {
+                const newUrl = input.value.trim();
+                videoSource.src = newUrl;
+                videoElem.load();
+                showToast('Custom video source updated!');
+                toggleVideoUrlInput();
+            } else {
+                showToast('Please enter a valid URL.', false);
+            }
+        }
+
+        function setLevel(lvl) {
+            currentLevel = lvl;
+            const btnO = document.getElementById('btnLevelO');
+            const btnN = document.getElementById('btnLevelN');
+            const badge = document.getElementById('currentLevelBadge');
+
+            if (lvl === 'O') {
+                btnO.className = 'px-3 py-1.5 rounded-md text-xs font-bold transition text-white bg-brand-600 shadow-sm';
+                btnN.className = 'px-3 py-1.5 rounded-md text-xs font-bold transition text-slate-400 hover:text-white';
+                if (badge) badge.innerText = 'GCE Upper Sec O-Level 1184';
+            } else {
+                btnN.className = 'px-3 py-1.5 rounded-md text-xs font-bold transition text-white bg-brand-600 shadow-sm';
+                btnO.className = 'px-3 py-1.5 rounded-md text-xs font-bold transition text-slate-400 hover:text-white';
+                if (badge) badge.innerText = 'GCE Upper Sec N(A)-Level 1190';
+            }
+
+            const selector = document.getElementById('topicSelector');
+            if (selector) {
+                let firstValid = null;
+                for (let option of selector.options) {
+                    const tKey = option.value;
+                    const tObj = EXAM_TOPICS[tKey];
+                    if (tObj) {
+                        const match = tObj.level === lvl;
+                        option.style.display = match ? 'block' : 'none';
+                        if (match && !firstValid) firstValid = tKey;
+                    }
+                }
+                if (firstValid && EXAM_TOPICS[selector.value]?.level !== lvl) {
+                    selector.value = firstValid;
+                }
+            }
+            loadTopic();
+        }
+
+        function loadTopic() {
+            const selector = document.getElementById('topicSelector');
+            if (!selector) return;
+            
+            currentTopicKey = selector.value;
+            const topic = EXAM_TOPICS[currentTopicKey];
+            if (!topic) return;
+
+            document.getElementById('topicTitle').innerText = topic.title;
+            document.getElementById('topicSubtitle').innerText = topic.subtitle;
+            document.getElementById('videoDescription').innerHTML = `<strong>Context:</strong> ${topic.videoDescription}`;
+            document.getElementById('plannedPromptText').innerText = topic.plannedPrompt;
+            document.getElementById('q1Text').innerText = topic.q1Prompt;
+
+            const videoElem = document.getElementById('stimulusVideo');
+            const videoSource = document.getElementById('videoSource');
+            if (videoElem && videoSource && topic.videoUrl) {
+                videoSource.src = topic.videoUrl;
+                videoElem.load();
+            }
+
+            resetQuestionState();
+        }
+
+        function resetQuestionState() {
+            activeQuestionNum = 1;
+            hasRecordedQuestions = false;
+
+            const activeQBadge = document.getElementById('activeQBadge');
+            if (activeQBadge) activeQBadge.innerText = 'Answering Question 1';
+
+            const q1Card = document.getElementById('q1Card');
+            const q2Card = document.getElementById('q2Card');
+            const q1Status = document.getElementById('q1Status');
+            const q2Status = document.getElementById('q2Status');
+            const q2Text = document.getElementById('q2Text');
+
+            if (q1Card) q1Card.className = 'p-4 rounded-xl border-2 border-brand-500 bg-brand-50/50 mb-3 transition cursor-pointer hover:border-brand-600';
+            if (q1Status) {
+                q1Status.className = 'text-xs font-bold text-amber-600';
+                q1Status.innerHTML = '<i class="fa-regular fa-clock"></i> Pending';
+            }
+
+            if (q2Card) q2Card.className = 'p-4 rounded-xl border border-slate-200 bg-slate-50 transition opacity-60 cursor-not-allowed';
+            if (q2Status) {
+                q2Status.className = 'text-xs font-bold text-slate-400';
+                q2Status.innerHTML = '<i class="fa-solid fa-lock text-slate-400 mr-1"></i> Hidden until Q1 recorded';
+            }
+            if (q2Text) {
+                q2Text.innerHTML = '<span class="italic text-slate-400 font-normal"><i class="fa-solid fa-eye-slash mr-1"></i> Question 2 prompt is concealed. Record your answer to Question 1 to reveal.</span>';
+            }
+
+            const lblRecordQ = document.getElementById('lblRecordQ');
+            if (lblRecordQ) lblRecordQ.innerText = 'Record Answer to Q1';
+
+            const btnNextQ = document.getElementById('btnNextQ');
+            if (btnNextQ) {
+                btnNextQ.disabled = true;
+                btnNextQ.className = 'w-full py-2.5 px-4 bg-slate-800 text-slate-500 font-bold text-xs rounded-xl flex items-center justify-center gap-2 transition cursor-not-allowed';
+            }
+        }
+
+        function switchTab(tabName) {
+            currentTab = tabName;
+            const t1 = document.getElementById('tab1');
+            const t2 = document.getElementById('tab2');
+            const t3 = document.getElementById('tab3');
+
+            const sPlanned = document.getElementById('sectionPlanned');
+            const sInteraction = document.getElementById('sectionInteraction');
+            const sReport = document.getElementById('sectionReport');
+
+            t1.className = "px-3.5 py-2 rounded-lg text-xs font-bold transition text-slate-600 hover:text-slate-900 flex items-center gap-2";
+            t2.className = "px-3.5 py-2 rounded-lg text-xs font-bold transition text-slate-600 hover:text-slate-900 flex items-center gap-2";
+            t3.className = "px-3.5 py-2 rounded-lg text-xs font-bold transition text-slate-600 hover:text-slate-900 flex items-center gap-2";
+
+            sPlanned.classList.add('hidden');
+            sInteraction.classList.add('hidden');
+            sReport.classList.add('hidden');
+
+            if (tabName === 'planned') {
+                t1.className = "px-3.5 py-2 rounded-lg text-xs font-bold transition text-brand-700 bg-white shadow-sm flex items-center gap-2";
+                sPlanned.classList.remove('hidden');
+            } else if (tabName === 'interaction') {
+                t2.className = "px-3.5 py-2 rounded-lg text-xs font-bold transition text-brand-700 bg-white shadow-sm flex items-center gap-2";
+                sInteraction.classList.remove('hidden');
+            } else if (tabName === 'report') {
+                t3.className = "px-3.5 py-2 rounded-lg text-xs font-bold transition text-brand-700 bg-white shadow-sm flex items-center gap-2";
+                sReport.classList.remove('hidden');
+
+                const tPlanned = document.getElementById('transcriptPlanned')?.value.trim();
+                const tQ1 = document.getElementById('transcriptQ1')?.value.trim();
+
+                if (hasRecordedPlanned || hasRecordedQuestions || tPlanned || tQ1) {
+                    generateFullReport();
+                } else if (!isDemoReport) {
+                    document.getElementById('reportEmptyState').classList.remove('hidden');
+                    document.getElementById('reportContent').classList.add('hidden');
+                }
+            }
+        }
+
+        function selectQuestion(qNum) {
+            if (qNum === 2 && !hasRecordedQuestions && !document.getElementById('transcriptQ1').value.trim()) {
+                showToast("Please record your answer for Question 1 first!", false);
+                return;
+            }
+            activeQuestionNum = qNum;
+            const topic = EXAM_TOPICS[currentTopicKey];
+            const activeQBadge = document.getElementById('activeQBadge');
+            const qHintText = document.getElementById('qHintText');
+            const lblRecordQ = document.getElementById('lblRecordQ');
+
+            if (activeQBadge) activeQBadge.innerText = `Answering Question ${qNum}`;
+            if (qHintText) qHintText.innerText = `Press record when ready to speak your response to Question ${qNum}.`;
+            if (lblRecordQ) lblRecordQ.innerText = `Record Answer to Q${qNum}`;
+
+            const q1Card = document.getElementById('q1Card');
+            const q2Card = document.getElementById('q2Card');
+            const q2Box = document.getElementById('q2TranscriptBox');
+
+            if (qNum === 1) {
+                q1Card.className = 'p-4 rounded-xl border-2 border-brand-500 bg-brand-50/50 mb-3 transition cursor-pointer hover:border-brand-600';
+                q2Card.className = 'p-4 rounded-xl border border-slate-200 bg-slate-50 transition cursor-pointer hover:border-slate-300';
+                if (q2Box) q2Box.classList.add('hidden');
+            } else {
+                q2Card.className = 'p-4 rounded-xl border-2 border-brand-500 bg-brand-50/50 mb-3 transition cursor-pointer hover:border-brand-600';
+                q1Card.className = 'p-4 rounded-xl border border-slate-200 bg-slate-50 transition cursor-pointer hover:border-slate-300';
+                if (q2Box) q2Box.classList.remove('hidden');
+            }
+        }
+
+        function startPrepTimer() {
+            if (prepTimerInterval) clearInterval(prepTimerInterval);
+            prepTimeSeconds = 600;
+            const display = document.getElementById('prepTimerDisplay');
+            const btn = document.getElementById('btnPrepTimer');
+            if (btn) btn.innerText = 'Timer Running...';
+
+            prepTimerInterval = setInterval(() => {
+                prepTimeSeconds--;
+                if (prepTimeSeconds <= 0) {
+                    clearInterval(prepTimerInterval);
+                    if (display) display.innerText = '00:00';
+                    if (btn) btn.innerText = 'Time Up!';
+                    showToast('10-Minute Preparation Time Complete!');
+                    return;
+                }
+                const mins = Math.floor(prepTimeSeconds / 60);
+                const secs = prepTimeSeconds % 60;
+                if (display) display.innerText = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+            }, 1000);
+        }
+
+        function initSpeechRecognition(targetTextareaId) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) return null;
+
+            const recognition = new SpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.lang = 'en-SG'; // Singapore English context
+
+            recognition.onresult = (event) => {
+                let finalTranscript = '';
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    if (event.results[i].isFinal) {
+                        finalTranscript += event.results[i][0].transcript + ' ';
+                    }
+                }
+                if (finalTranscript) {
+                    const txt = document.getElementById(targetTextareaId);
+                    if (txt) {
+                        txt.value = (txt.value + ' ' + finalTranscript).trim();
+                    }
+                }
+            };
+
+            return recognition;
+        }
+
+        async function togglePlannedRecord() {
+            const btn = document.getElementById('btnRecordPlanned');
+            const ring = document.getElementById('plannedRecordRing');
+            const lbl = document.getElementById('lblRecordPlanned');
+            const timer = document.getElementById('plannedTimer');
+            const hint = document.getElementById('plannedHintText');
+            const btnProceed = document.getElementById('btnProceedInteraction');
+
+            if (!isRecordingPlanned) {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    plannedMediaRecorder = new MediaRecorder(stream);
+                    plannedMediaRecorder.start();
+
+                    speechRecognizerPlanned = initSpeechRecognition('transcriptPlanned');
+                    if (speechRecognizerPlanned) {
+                        try { speechRecognizerPlanned.start(); } catch(e) {}
+                    }
+
+                    isRecordingPlanned = true;
+                    plannedTimeSeconds = 0;
+
+                    if (ring) ring.className = 'w-20 h-20 rounded-full bg-rose-600 text-white flex items-center justify-center mb-3 recording-pulse';
+                    if (lbl) lbl.innerText = 'Stop & Save Planned Response';
+                    if (btn) btn.className = 'w-full py-3.5 px-4 bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-rose-600/30 flex items-center justify-center gap-2 transition cursor-pointer';
+                    if (hint) hint.innerText = 'Transcribing live... Speak clearly.';
+
+                    plannedTimerInterval = setInterval(() => {
+                        plannedTimeSeconds++;
+                        const mins = Math.floor(plannedTimeSeconds / 60);
+                        const secs = plannedTimeSeconds % 60;
+                        if (timer) timer.innerText = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+                        if (plannedTimeSeconds >= 120) togglePlannedRecord();
+                    }, 1000);
+
+                } catch (err) {
+                    showToast('Microphone access unavailable or blocked.', false);
+                }
+            } else {
+                if (plannedMediaRecorder && plannedMediaRecorder.state !== 'inactive') plannedMediaRecorder.stop();
+                if (speechRecognizerPlanned) {
+                    try { speechRecognizerPlanned.stop(); } catch(e) {}
+                }
+                clearInterval(plannedTimerInterval);
+                isRecordingPlanned = false;
+                hasRecordedPlanned = true;
+
+                if (ring) ring.className = 'w-20 h-20 rounded-full bg-emerald-600 text-white flex items-center justify-center mb-3 border-2 border-emerald-400';
+                if (lbl) lbl.innerText = 'Re-record Response';
+                if (btn) btn.className = 'w-full py-3.5 px-4 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs rounded-xl flex items-center justify-center gap-2 transition cursor-pointer';
+                if (hint) hint.innerText = `Recording captured (${plannedTimeSeconds}s). Transcripts ready for evaluation.`;
+                
+                if (btnProceed) {
+                    btnProceed.disabled = false;
+                    btnProceed.className = 'w-full py-2.5 px-4 bg-brand-600 hover:bg-brand-500 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-2 transition cursor-pointer shadow-md';
+                }
+                showToast('Planned Response recorded & transcribed!');
+            }
+        }
+
+        async function toggleQuestionRecord() {
+            const btn = document.getElementById('btnRecordQ');
+            const ring = document.getElementById('qRecordingRing');
+            const lbl = document.getElementById('lblRecordQ');
+            const timer = document.getElementById('qTimer');
+            const hint = document.getElementById('qHintText');
+            const btnNextQ = document.getElementById('btnNextQ');
+
+            const targetTxtId = activeQuestionNum === 1 ? 'transcriptQ1' : 'transcriptQ2';
+
+            if (!isRecordingQuestion) {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    questionMediaRecorder = new MediaRecorder(stream);
+                    questionMediaRecorder.start();
+
+                    speechRecognizerQ = initSpeechRecognition(targetTxtId);
+                    if (speechRecognizerQ) {
+                        try { speechRecognizerQ.start(); } catch(e) {}
+                    }
+
+                    isRecordingQuestion = true;
+                    questionTimeSeconds = 0;
+
+                    if (ring) ring.className = 'w-20 h-20 rounded-full bg-rose-600 text-white flex items-center justify-center mb-3 recording-pulse';
+                    if (lbl) lbl.innerText = `Stop Answer to Q${activeQuestionNum}`;
+                    if (btn) btn.className = 'w-full py-3.5 px-4 bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-rose-600/30 flex items-center justify-center gap-2 transition cursor-pointer';
+                    if (hint) hint.innerText = `Recording response to Q${activeQuestionNum}...`;
+
+                    questionTimerInterval = setInterval(() => {
+                        questionTimeSeconds++;
+                        const mins = Math.floor(questionTimeSeconds / 60);
+                        const secs = questionTimeSeconds % 60;
+                        if (timer) timer.innerText = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+                    }, 1000);
+
+                } catch (err) {
+                    showToast('Microphone access denied or unavailable.', false);
+                }
+            } else {
+                if (questionMediaRecorder && questionMediaRecorder.state !== 'inactive') questionMediaRecorder.stop();
+                if (speechRecognizerQ) {
+                    try { speechRecognizerQ.stop(); } catch(e) {}
+                }
+                clearInterval(questionTimerInterval);
+                isRecordingQuestion = false;
+
+                if (ring) ring.className = 'w-20 h-20 rounded-full bg-emerald-600 text-white flex items-center justify-center mb-3 border-2 border-emerald-400';
+                if (lbl) lbl.innerText = `Re-record Answer to Q${activeQuestionNum}`;
+                if (btn) btn.className = 'w-full py-3.5 px-4 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs rounded-xl flex items-center justify-center gap-2 transition cursor-pointer';
+                if (hint) hint.innerText = `Answer to Q${activeQuestionNum} saved (${questionTimeSeconds}s).`;
+                
+                if (activeQuestionNum === 1) {
+                    hasRecordedQuestions = true;
+                    unlockQuestion2();
+                }
+
+                if (btnNextQ) {
+                    btnNextQ.disabled = false;
+                    btnNextQ.className = 'w-full py-2.5 px-4 bg-brand-600 hover:bg-brand-500 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-2 transition cursor-pointer shadow-md';
+                }
+                showToast(`Question ${activeQuestionNum} response transcribed!`);
+            }
+        }
+
+        function unlockQuestion2() {
+            const topic = EXAM_TOPICS[currentTopicKey];
+            const q1Status = document.getElementById('q1Status');
+            const q2Card = document.getElementById('q2Card');
+            const q2Status = document.getElementById('q2Status');
+            const q2Text = document.getElementById('q2Text');
+
+            if (q1Status) {
+                q1Status.className = 'text-xs font-bold text-emerald-600';
+                q1Status.innerHTML = '<i class="fa-solid fa-circle-check"></i> Completed';
+            }
+
+            if (q2Card) q2Card.className = 'p-4 rounded-xl border border-slate-200 bg-slate-50 transition cursor-pointer hover:border-brand-300 opacity-100';
+            if (q2Status) {
+                q2Status.className = 'text-xs font-bold text-amber-600';
+                q2Status.innerHTML = '<i class="fa-regular fa-clock"></i> Unlocked';
+            }
+            if (q2Text && topic) q2Text.innerText = topic.q2Prompt;
+        }
+
+        function advanceQuestion() {
+            if (activeQuestionNum === 1) {
+                selectQuestion(2);
+            } else {
+                switchTab('report');
+            }
+        }
+
+        // --- PRECISE MARKING RUBRICS EVALUATION LOGIC (1184 O-LEVEL vs 1190 N(A)-LEVEL) ---
+        function evaluateRubrics() {
+            const topic = EXAM_TOPICS[currentTopicKey];
+            const pText = document.getElementById('transcriptPlanned')?.value.trim() || '';
+            const q1Text = document.getElementById('transcriptQ1')?.value.trim() || '';
+            const q2Text = document.getElementById('transcriptQ2')?.value.trim() || '';
+
+            const fullText = `${pText} ${q1Text} ${q2Text}`.toLowerCase();
+            const pLower = pText.toLowerCase();
+
+            // Speech Metrics
+            const wordList = fullText.split(/\s+/).filter(w => w.length > 0);
+            const wordCount = wordList.length;
+
+            const totalTimeSecs = Math.max(1, plannedTimeSeconds + questionTimeSeconds);
+            const wpm = totalTimeSecs > 0 ? Math.round((wordCount / totalTimeSecs) * 60) : 120;
+
+            // Filler Word Counter
+            const fillers = fullText.match(/\b(um|uh|like|you know|err|ah)\b/gi) || [];
+            const fillerCount = fillers.length;
+
+            // PEEL Framework Analyzer for Part 1
+            const pointPhrases = ['i recommend', 'i strongly', 'in my opinion', 'i believe', 'i agree', 'i disagree', 'my stance', 'i would say'];
+            const elabPhrases = ['because', 'furthermore', 'moreover', 'in addition', 'as a result', 'consequently', 'this allows', 'this ensures'];
+            const evidPhrases = ['for example', 'for instance', 'in the video', 'as seen', 'from the video', 'such as', 'personal experience'];
+            const linkPhrases = ['in conclusion', 'to summarize', 'therefore', 'ultimately', 'hence', 'overall'];
+
+            let peelMet = 0;
+            if (pointPhrases.some(p => pLower.includes(p))) peelMet++;
+            if (elabPhrases.some(p => pLower.includes(p))) peelMet++;
+            if (evidPhrases.some(p => pLower.includes(p))) peelMet++;
+            if (linkPhrases.some(p => pLower.includes(p))) peelMet++;
+
+            // Topic Keyword Coverage
+            let keywordMatches = 0;
+            if (topic.keywords) {
+                keywordMatches = topic.keywords.filter(kw => fullText.includes(kw)).length;
+            }
+
+            const isOLevel = currentLevel === 'O';
+
+            // PART 1 RESPONSE & DEVELOPMENT (10 MARKS)
+            let scoreResp = 4;
+            if (pText.length > 30) scoreResp += 2;
+            if (peelMet >= 2) scoreResp += 2;
+            if (peelMet >= 4) scoreResp += 1;
+            if (keywordMatches >= 3) scoreResp += 1;
+            scoreResp = Math.min(10, Math.max(1, scoreResp));
+
+            let feedbackResp = "";
+            if (isOLevel) {
+                if (scoreResp >= 9) feedbackResp = "Band 5 (9-10m): A well-considered response which is well-developed and organized. Uses a wide range of well-chosen vocabulary.";
+                else if (scoreResp >= 7) feedbackResp = "Band 4 (7-8m): A thoughtful response which is generally well-developed and organized. Uses appropriate structures.";
+                else if (scoreResp >= 5) feedbackResp = "Band 3 (5-6m): Response has some development and organization. Some attempt at range.";
+                else if (scoreResp >= 3) feedbackResp = "Band 2 (3-4m): Ideas have simple development and organization. Simple vocabulary used.";
+                else feedbackResp = "Band 1 (1-2m): A slight attempt to address the topic.";
+            } else {
+                if (scoreResp >= 9) feedbackResp = "Band 5 (9-10m): A considered response which is well-developed and organized. Appropriate vocabulary.";
+                else if (scoreResp >= 7) feedbackResp = "Band 4 (7-8m): Response is generally well-developed and organized.";
+                else if (scoreResp >= 5) feedbackResp = "Band 3 (5-6m): Response has some development.";
+                else if (scoreResp >= 3) feedbackResp = "Band 2 (3-4m): Simple development.";
+                else feedbackResp = "Band 1 (1-2m): Slight attempt to address topic.";
+            }
+
+            // PART 1 DELIVERY (5 MARKS)
+            let scoreDeliv = 2;
+            if (wpm >= 100 && wpm <= 160) scoreDeliv += 1.5;
+            if (fillerCount <= 3) scoreDeliv += 1.5;
+            scoreDeliv = Math.min(5, Math.max(1, Math.round(scoreDeliv)));
+
+            let feedbackDeliv = "";
+            if (isOLevel) {
+                if (scoreDeliv >= 5) feedbackDeliv = "Band 5 (5m): Delivery is fluent with clear pronunciation, and intonation varied to good effect.";
+                else if (scoreDeliv >= 4) feedbackDeliv = "Band 4 (4m): Delivery is generally fluent and clear in pronunciation.";
+                else if (scoreDeliv >= 3) feedbackDeliv = "Band 3 (3m): Delivery is quite fluent with intelligible pronunciation.";
+                else if (scoreDeliv >= 2) feedbackDeliv = "Band 2 (2m): Patches of fluent delivery with attempts at appropriate intonation.";
+                else feedbackDeliv = "Band 1 (1m): Pronunciation is intelligible at times.";
+            } else {
+                if (scoreDeliv >= 5) feedbackDeliv = "Band 5 (5m): Delivery is fluent with clear pronunciation and appropriate intonation.";
+                else if (scoreDeliv >= 4) feedbackDeliv = "Band 4 (4m): Delivery is generally fluent and clear.";
+                else if (scoreDeliv >= 3) feedbackDeliv = "Band 3 (3m): Delivery is quite fluent.";
+                else if (scoreDeliv >= 2) feedbackDeliv = "Band 2 (2m): Patches of fluent delivery.";
+                else feedbackDeliv = "Band 1 (1m): Intelligible at times.";
+            }
+
+            // PART 2 SPOKEN INTERACTION (15 MARKS)
+            let scoreInter = 6;
+            if (q1Text.length > 25) scoreInter += 3;
+            if (q2Text.length > 25) scoreInter += 3;
+            if (keywordMatches >= 4) scoreInter += 2;
+            if (fullText.includes('however') || fullText.includes('on the other hand') || fullText.includes('whereas') || fullText.includes('perspective') || fullText.includes('society')) scoreInter += 1;
+            scoreInter = Math.min(15, Math.max(1, scoreInter));
+
+            let feedbackInter = "";
+            if (isOLevel) {
+                if (scoreInter >= 13) feedbackInter = "Band 5 (13-15m): Offers well-considered responses with coherent perspectives. Sustained discussion.";
+                else if (scoreInter >= 10) feedbackInter = "Band 4 (10-12m): Offers thoughtful responses with generally well-developed perspectives.";
+                else if (scoreInter >= 7) feedbackInter = "Band 3 (7-9m): Offers perspectives with some development and support.";
+                else if (scoreInter >= 4) feedbackInter = "Band 2 (4-6m): Simple development in responses.";
+                else feedbackInter = "Band 1 (1-3m): Slight attempt to engage in discussion.";
+            } else {
+                if (scoreInter >= 13) feedbackInter = "Band 5 (13-15m): Considered responses with coherent perspectives.";
+                else if (scoreInter >= 10) feedbackInter = "Band 4 (10-12m): Generally well-developed perspectives.";
+                else if (scoreInter >= 7) feedbackInter = "Band 3 (7-9m): Perspectives with some development.";
+                else if (scoreInter >= 4) feedbackInter = "Band 2 (4-6m): Simple development.";
+                else feedbackInter = "Band 1 (1-3m): Slight attempt to address topic.";
+            }
+
+            const totalScore = scoreResp + scoreDeliv + scoreInter;
+
+            return {
+                totalScore,
+                scoreResp,
+                feedbackResp,
+                scoreDeliv,
+                feedbackDeliv,
+                scoreInter,
+                feedbackInter,
+                wordCount,
+                wpm,
+                fillerCount,
+                peelMet,
+                q1Length: q1Text.length,
+                q2Length: q2Text.length
+            };
+        }
+
+        function generateFullReport() {
+            document.getElementById('reportEmptyState').classList.add('hidden');
+            document.getElementById('reportContent').classList.remove('hidden');
+
+            const res = evaluateRubrics();
+            const isOLevel = currentLevel === 'O';
+
+            // Candidate Info Display
+            const cName = candidateName || 'Unspecified Candidate';
+            const cClass = candidateClass ? ` (${candidateClass})` : '';
+            document.getElementById('reportCandidateBadge').innerText = `Candidate: ${cName}${cClass}`;
+            document.getElementById('reportSyllabusText').innerText = isOLevel ? 
+                'Evaluated against GCE O-Level 1184 Upper Sec Mark Sheet Descriptors.' : 
+                'Evaluated against GCE N(A)-Level 1190 Upper Sec Mark Sheet Descriptors.';
+
+            document.getElementById('scoreTotal').innerText = res.totalScore;
+            document.getElementById('scoreResponse').innerText = `${res.scoreResp} / 10`;
+            document.getElementById('barResponse').style.width = `${(res.scoreResp / 10) * 100}%`;
+            document.getElementById('feedbackResponse').innerText = res.feedbackResp;
+
+            document.getElementById('scoreDelivery').innerText = `${res.scoreDeliv} / 5`;
+            document.getElementById('barDelivery').style.width = `${(res.scoreDeliv / 5) * 100}%`;
+            document.getElementById('feedbackDelivery').innerText = res.feedbackDeliv;
+
+            document.getElementById('scoreInteraction').innerText = `${res.scoreInter} / 15`;
+            document.getElementById('barInteraction').style.width = `${(res.scoreInter / 15) * 100}%`;
+            document.getElementById('feedbackInteraction').innerText = res.feedbackInter;
+
+            // Update Metrics Cards
+            document.getElementById('metricWpm').innerText = `${res.wpm} WPM`;
+            document.getElementById('metricFillers').innerText = `${res.fillerCount} Fillers`;
+            document.getElementById('metricPeel').innerText = `${res.peelMet} / 4 Met`;
+            document.getElementById('metricWordCount').innerText = `${res.wordCount} Words`;
+
+            const bandTag = document.getElementById('rubricBandTag');
+            if (res.totalScore >= 25) {
+                bandTag.innerText = 'Band 5 (Well-Considered & Fluently Expressed)';
+                bandTag.className = 'px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-400/20 text-emerald-300 border border-emerald-400/30';
+            } else if (res.totalScore >= 19) {
+                bandTag.innerText = 'Band 4 (Generally Well-Developed & Clear)';
+                bandTag.className = 'px-2.5 py-0.5 rounded-full text-xs font-bold bg-teal-400/20 text-teal-300 border border-teal-400/30';
+            } else if (res.totalScore >= 13) {
+                bandTag.innerText = 'Band 3 (Some Development & Intelligible)';
+                bandTag.className = 'px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-400/20 text-amber-300 border border-amber-400/30';
+            } else {
+                bandTag.innerText = 'Band 1-2 (Simple Development & Limited)';
+                bandTag.className = 'px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-400/20 text-rose-300 border border-rose-400/30';
+            }
+
+            // Populate Granular Component Feedback Fields
+            document.getElementById('prStrength').innerText = res.peelMet >= 2 ? "Strong direct stance supported by structured PEEL points." : "Addresses prompt directly with clear initial viewpoint.";
+            document.getElementById('prGrowth').innerText = res.peelMet < 4 ? "Complete all 4 parts of PEEL (explicit Point, Elaboration, Video Evidence, Link)." : "Enhance vocabulary with domain-specific collocations.";
+            document.getElementById('prStep').innerText = isOLevel ? 
+                "Integrate wide-ranging vocabulary and make 2 distinct video references." : 
+                "Incorporate clear evidence from the video clip to back up your reasons.";
+
+            document.getElementById('delivStrength').innerText = res.fillerCount <= 2 ? "High delivery control with very few filler hesitations." : "Maintains intelligible overall pace.";
+            document.getElementById('delivGrowth').innerText = res.wpm > 150 ? "Slow down speech rate slightly for better intonation control." : "Vary intonation to emphasize key thesis points.";
+            document.getElementById('delivStep').innerText = isOLevel ? 
+                "Vary intonation to good effect by pitch-shifting on contrasting conjunctions like 'However' or 'Conversely'." : 
+                "Maintain fluent delivery with varied and appropriate intonation on key points.";
+
+            document.getElementById('q1Strength').innerText = res.q1Length > 40 ? "Comprehensive elaboration on personal application prompt." : "Answers Question 1 directly.";
+            document.getElementById('q1Growth').innerText = res.q1Length <= 40 ? "Expand personal experience with specific real-world examples." : "Incorporate higher-tier connectors.";
+            document.getElementById('q1Step').innerText = "Use the PREP structure: Point, Reason, Personal Example, and concluding Point.";
+
+            document.getElementById('q2Strength').innerText = res.q2Length > 40 ? "Demonstrates thoughtful societal analysis." : "Attempts broader issue prompt.";
+            document.getElementById('q2Growth').innerText = res.q2Length <= 40 ? "Analyze multiple perspectives (e.g., individual, community, state)." : "Proactively move beyond basic prompt parameters.";
+            document.getElementById('q2Step').innerText = isOLevel ? 
+                "Sustain discussion by spontaneously raising counter-perspectives before concluding." : 
+                "Offer a well-developed perspective explaining why the issue matters to society.";
+
+            // Action Plan Roadmap text
+            const apHeader = document.getElementById('actionPlanHeader');
+            const apBody = document.getElementById('actionPlanBody');
+            if (res.totalScore >= 25) {
+                apHeader.innerText = "Sustaining Band 5 Excellence (25-30 Marks)";
+                apBody.innerText = "To maintain top tier marks, continue using sophisticated vocabulary, seamless transitions, and proactive spontaneous discussion that naturally extends beyond examiner prompts.";
+            } else if (res.totalScore >= 19) {
+                apHeader.innerText = "Action Steps to Reach Band 5 (25-30 Marks)";
+                apBody.innerText = "Elevate from Band 4 to Band 5 by elevating vocabulary precision (e.g., replacing generic words with mature academic phrasing) and offering coherent, multi-faceted arguments in Spoken Interaction.";
+            } else {
+                apHeader.innerText = "Action Steps to Reach Band 4 (19-24 Marks)";
+                apBody.innerText = "Focus on structuring Part 1 using full PEEL points, reducing filler pause words, and ensuring each answer in Spoken Interaction includes both a clear point and a detailed example.";
+            }
+
+            renderRadarChart([
+                (res.scoreResp / 10) * 100,
+                (res.scoreDeliv / 5) * 100,
+                (res.scoreInter / 15) * 100,
+                Math.min(100, res.peelMet * 25),
+                Math.max(20, 100 - res.fillerCount * 15)
+            ]);
+        }
+
+        function loadDemoReport() {
+            isDemoReport = true;
+            if (!candidateName) {
+                document.getElementById('candidateNameInput').value = "Clarissa Lim";
+                document.getElementById('candidateClassInput').value = "Sec 4-4 (12)";
+                updateCandidateInfo();
+            }
+
+            document.getElementById('transcriptPlanned').value = "I would strongly recommend skateboarding for young people. As shown in the video clip, it builds physical coordination and resilience because skaters encourage each other when attempting tricks. Moreover, it fosters peer bonding in public spaces.";
+            document.getElementById('transcriptQ1').value = "If I were to design a recreational space, I would include dedicated sports zones alongside quiet study pavilions to cater to different student interests.";
+            document.getElementById('transcriptQ2').value = "While fast-paced academic lifestyles reduce free time, prioritizing mental well-being makes recreational spaces crucial for holistic development in Singapore.";
+
+            generateFullReport();
+        }
+
+        function renderRadarChart(dataPoints) {
+            const ctx = document.getElementById('radarChart')?.getContext('2d');
+            if (!ctx) return;
+
+            if (radarChartInstance) radarChartInstance.destroy();
+
+            radarChartInstance = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['Content (10m)', 'Delivery (5m)', 'Interaction (15m)', 'PEEL Logic', 'Fluency Control'],
+                    datasets: [{
+                        label: 'Candidate Competency Profile',
+                        data: dataPoints,
+                        backgroundColor: 'rgba(2, 132, 199, 0.2)',
+                        borderColor: '#0284c7',
+                        borderWidth: 2,
+                        pointBackgroundColor: '#0369a1'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    scales: {
+                        r: {
+                            angleLines: { color: '#e2e8f0' },
+                            grid: { color: '#f1f5f9' },
+                            suggestedMin: 0,
+                            suggestedMax: 100,
+                            ticks: { display: false }
+                        }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        function showToast(msg, success = true) {
+            const toast = document.getElementById('toastMessage');
+            const icon = document.getElementById('toastIcon');
+            const txt = document.getElementById('toastText');
+
+            if (txt) txt.innerText = msg;
+            if (icon) icon.className = success ? 'fa-solid fa-circle-check text-teal-400' : 'fa-solid fa-triangle-exclamation text-rose-400';
+
+            if (toast) {
+                toast.classList.remove('hidden');
+                toast.classList.add('flex');
+                setTimeout(() => {
+                    toast.classList.add('hidden');
+                    toast.classList.remove('flex');
+                }, 3000);
+            }
+        }
+
+        function openSubmitModal() {
+            const res = evaluateRubrics();
+            document.getElementById('modalLevelText').innerText = currentLevel === 'O' ? 'O-Level (1184)' : 'N(A)-Level (1190)';
+            document.getElementById('modalTopicText').innerText = EXAM_TOPICS[currentTopicKey]?.title || 'Practice Topic';
+            document.getElementById('modalScoreText').innerText = `${res.totalScore} / 30 Marks`;
+
+            const modal = document.getElementById('submitModal');
+            if (modal) modal.classList.remove('hidden');
+        }
+
+        function closeSubmitModal() {
+            const modal = document.getElementById('submitModal');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        // --- TEACHER PERSISTENCE & DATA TRACKING FUNCTIONS ---
+
+        function getStoredSubmissions() {
+            try {
+                const data = localStorage.getItem('gce_oral_submissions');
+                return data ? JSON.parse(data) : [];
+            } catch (e) {
+                return [];
+            }
+        }
+
+        function saveStoredSubmissions(subs) {
+            try {
+                localStorage.setItem('gce_oral_submissions', JSON.stringify(subs));
+                updateTeacherBadge();
+            } catch (e) {}
+        }
+
+        function updateTeacherBadge() {
+            const subs = getStoredSubmissions();
+            const badge = document.getElementById('teacherBadgeCount');
+            if (badge) badge.innerText = subs.length;
+        }
+
+        function handleStudentSubmit(e) {
+            e.preventDefault();
+            const sName = document.getElementById('inputStudentName')?.value.trim();
+            const sClass = document.getElementById('inputStudentClass')?.value.trim();
+            const sReflection = document.getElementById('inputStudentReflection')?.value.trim();
+
+            if (!sName || !sClass) {
+                showToast('Please enter both student name and class.', false);
+                return;
+            }
+
+            candidateName = sName;
+            candidateClass = sClass;
+            document.getElementById('candidateNameInput').value = sName;
+            document.getElementById('candidateClassInput').value = sClass;
+            updateCandidateInfo();
+
+            const rubricRes = evaluateRubrics();
+            const topic = EXAM_TOPICS[currentTopicKey];
+
+            const newSubmission = {
+                id: 'sub_' + Date.now(),
+                studentName: sName,
+                studentClass: sClass,
+                studentReflection: sReflection || 'No candidate reflection provided.',
+                timestamp: new Date().toLocaleString('en-SG', { dateStyle: 'medium', timeStyle: 'short' }),
+                level: currentLevel,
+                topicKey: currentTopicKey,
+                topicTitle: topic.title,
+                scoreTotal: rubricRes.totalScore,
+                scoreResponse: rubricRes.scoreResp,
+                scoreDelivery: rubricRes.scoreDeliv,
+                scoreInteraction: rubricRes.scoreInter,
+                wpm: rubricRes.wpm,
+                fillers: rubricRes.fillerCount,
+                peelMet: rubricRes.peelMet,
+                transcriptPlanned: document.getElementById('transcriptPlanned')?.value.trim() || 'No audio recorded.',
+                transcriptQ1: document.getElementById('transcriptQ1')?.value.trim() || 'No response recorded.',
+                transcriptQ2: document.getElementById('transcriptQ2')?.value.trim() || 'No response recorded.',
+                teacherNotes: ''
+            };
+
+            const existing = getStoredSubmissions();
+            existing.unshift(newSubmission);
+            saveStoredSubmissions(existing);
+
+            showToast('Submission recorded & sent to Teacher Dashboard!');
+            closeSubmitModal();
+        }
+
+        function openTeacherModal() {
+            fetchTeacherSubmissions();
+            const modal = document.getElementById('teacherModal');
+            if (modal) modal.classList.remove('hidden');
+        }
+
+        function closeTeacherModal() {
+            const modal = document.getElementById('teacherModal');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        function fetchTeacherSubmissions() {
+            const container = document.getElementById('teacherSubmissionsContainer');
+            if (!container) return;
+
+            const submissions = getStoredSubmissions();
+            updateTeacherBadge();
+
+            if (submissions.length === 0) {
+                container.innerHTML = `
+                    <div class="bg-white rounded-2xl p-10 border border-slate-200 text-center flex flex-col items-center justify-center">
+                        <div class="w-14 h-14 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center text-xl mb-3">
+                            <i class="fa-solid fa-folder-open"></i>
+                        </div>
+                        <h4 class="font-heading font-bold text-slate-800 text-base mb-1">No Student Submissions Yet</h4>
+                        <p class="text-xs text-slate-500 max-w-sm mb-5">Submissions will appear here when students complete practice recordings and click "Submit to Teacher".</p>
+                        <button onclick="seedDemoSubmissions()" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs rounded-xl shadow transition">
+                            <i class="fa-solid fa-users mr-1"></i> Populate Sample Class Data
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            renderSubmissionCards(submissions);
+        }
+
+        function renderSubmissionCards(subs) {
+            const container = document.getElementById('teacherSubmissionsContainer');
+            if (!container) return;
+
+            container.innerHTML = subs.map(sub => {
+                const isO = sub.level === 'O';
+                const scoreColor = sub.scoreTotal >= 25 ? 'text-emerald-600 bg-emerald-50 border-emerald-200' :
+                                   sub.scoreTotal >= 19 ? 'text-teal-600 bg-teal-50 border-teal-200' : 'text-amber-600 bg-amber-50 border-amber-200';
+
+                return `
+                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden transition hover:border-brand-300">
+                        <div class="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-50/70 border-b border-slate-200">
+                            <div class="flex items-center gap-3">
+                                <div class="w-11 h-11 rounded-xl bg-slate-900 text-teal-300 font-extrabold flex items-center justify-center text-sm font-heading shadow-sm shrink-0">
+                                    ${sub.studentName.charAt(0).toUpperCase()}
+                                </div>
+                                <div>
+                                    <div class="flex items-center gap-2">
+                                        <h4 class="font-heading font-bold text-slate-900 text-base leading-tight">${sub.studentName}</h4>
+                                        <span class="px-2 py-0.5 bg-slate-200 text-slate-700 text-[10px] font-bold rounded-md">${sub.studentClass}</span>
+                                        <span class="px-2 py-0.5 ${isO ? 'bg-brand-100 text-brand-800' : 'bg-purple-100 text-purple-800'} text-[10px] font-bold rounded-md">${isO ? '1184 O-Lvl' : '1190 N(A)'}</span>
+                                    </div>
+                                    <p class="text-xs text-slate-500 mt-0.5"><i class="fa-solid fa-book-bookmark text-slate-400 mr-1"></i> ${sub.topicTitle} • <span class="text-slate-400">${sub.timestamp}</span></p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center gap-3">
+                                <div class="px-3.5 py-1.5 rounded-xl border font-mono font-bold text-sm ${scoreColor} text-center">
+                                    <span class="text-base">${sub.scoreTotal}</span> <span class="text-[10px] opacity-80">/ 30 Marks</span>
+                                </div>
+                                <button onclick="toggleSubmissionDetails('${sub.id}')" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-xs font-bold transition flex items-center gap-1">
+                                    <span>Details</span> <i class="fa-solid fa-chevron-down text-[10px]" id="icon_${sub.id}"></i>
+                                </button>
+                                <button onclick="deleteSubmission('${sub.id}')" title="Delete record" class="text-slate-400 hover:text-rose-600 px-1.5 py-1 transition">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Expandable Details Drawer -->
+                        <div id="details_${sub.id}" class="hidden p-5 border-t border-slate-200 space-y-4 bg-white">
+                            <!-- Diagnostic Metrics Bar -->
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                                <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+                                    <span class="text-[10px] font-bold text-slate-400 uppercase">Part 1 Content</span>
+                                    <div class="font-extrabold text-slate-800 text-sm mt-0.5">${sub.scoreResponse} / 10</div>
+                                </div>
+                                <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+                                    <span class="text-[10px] font-bold text-slate-400 uppercase">Part 1 Delivery</span>
+                                    <div class="font-extrabold text-slate-800 text-sm mt-0.5">${sub.scoreDelivery} / 5</div>
+                                </div>
+                                <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+                                    <span class="text-[10px] font-bold text-slate-400 uppercase">Part 2 Interaction</span>
+                                    <div class="font-extrabold text-slate-800 text-sm mt-0.5">${sub.scoreInteraction} / 15</div>
+                                </div>
+                                <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+                                    <span class="text-[10px] font-bold text-slate-400 uppercase">Speech Rate / Fillers</span>
+                                    <div class="font-extrabold text-slate-800 text-sm mt-0.5">${sub.wpm} WPM • ${sub.fillers} Fillers</div>
+                                </div>
+                            </div>
+
+                            <!-- Student Reflection -->
+                            <div class="bg-amber-50 p-3 rounded-xl border border-amber-200 text-xs">
+                                <strong class="text-amber-900 block font-bold mb-0.5"><i class="fa-solid fa-comment-dots mr-1"></i> Candidate Self-Reflection:</strong>
+                                <p class="text-amber-900 font-medium italic">"${sub.studentReflection}"</p>
+                            </div>
+
+                            <!-- Full Speech Transcripts -->
+                            <div class="space-y-2 text-xs">
+                                <div class="bg-slate-900 text-slate-200 p-3.5 rounded-xl font-mono">
+                                    <span class="text-[10px] font-bold text-teal-400 uppercase block mb-1">Part 1: Planned Response Transcript</span>
+                                    ${sub.transcriptPlanned}
+                                </div>
+                                <div class="bg-slate-900 text-slate-200 p-3.5 rounded-xl font-mono">
+                                    <span class="text-[10px] font-bold text-teal-400 uppercase block mb-1">Part 2: Question 1 Transcript</span>
+                                    ${sub.transcriptQ1}
+                                </div>
+                                <div class="bg-slate-900 text-slate-200 p-3.5 rounded-xl font-mono">
+                                    <span class="text-[10px] font-bold text-teal-400 uppercase block mb-1">Part 2: Question 2 Transcript</span>
+                                    ${sub.transcriptQ2}
+                                </div>
+                            </div>
+
+                            <!-- Teacher Custom Note -->
+                            <div class="pt-2">
+                                <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">Teacher Internal Endorsement & Custom Feedback Note:</label>
+                                <div class="flex gap-2">
+                                    <input id="note_${sub.id}" type="text" value="${sub.teacherNotes || ''}" placeholder="Enter qualitative teacher feedback..." class="flex-1 text-xs px-3 py-2 rounded-lg border border-slate-300 focus:outline-none focus:border-teal-500 font-medium">
+                                    <button onclick="saveTeacherNote('${sub.id}')" class="px-3 py-2 bg-teal-600 hover:bg-teal-500 text-white text-xs font-bold rounded-lg transition">Save Note</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function toggleSubmissionDetails(id) {
+            const drawer = document.getElementById(`details_${id}`);
+            const icon = document.getElementById(`icon_${id}`);
+            if (drawer) {
+                drawer.classList.toggle('hidden');
+                if (icon) icon.className = drawer.classList.contains('hidden') ? 'fa-solid fa-chevron-down text-[10px]' : 'fa-solid fa-chevron-up text-[10px]';
+            }
+        }
+
+        function saveTeacherNote(id) {
+            const noteInput = document.getElementById(`note_${id}`);
+            if (!noteInput) return;
+
+            const subs = getStoredSubmissions();
+            const target = subs.find(s => s.id === id);
+            if (target) {
+                target.teacherNotes = noteInput.value.trim();
+                saveStoredSubmissions(subs);
+                showToast('Teacher note saved!');
+            }
+        }
+
+        function deleteSubmission(id) {
+            let subs = getStoredSubmissions();
+            subs = subs.filter(s => s.id !== id);
+            saveStoredSubmissions(subs);
+            fetchTeacherSubmissions();
+            showToast('Submission deleted.');
+        }
+
+        function clearAllTeacherSubmissions() {
+            if (confirm('Are you sure you want to clear all student submissions from this browser?')) {
+                localStorage.removeItem('gce_oral_submissions');
+                fetchTeacherSubmissions();
+                showToast('All submissions cleared.');
+            }
+        }
+
+        function filterTeacherSubmissions() {
+            const query = document.getElementById('teacherSearchInput')?.value.toLowerCase().trim() || '';
+            const subs = getStoredSubmissions();
+            if (!query) {
+                renderSubmissionCards(subs);
+                return;
+            }
+
+            const filtered = subs.filter(s => 
+                s.studentName.toLowerCase().includes(query) || 
+                s.studentClass.toLowerCase().includes(query) ||
+                s.topicTitle.toLowerCase().includes(query)
+            );
+            renderSubmissionCards(filtered);
+        }
+
+        function seedDemoSubmissions() {
+            const demoData = [
+                {
+                    id: 'sub_demo_1',
+                    studentName: 'Ethan Tan',
+                    studentClass: 'Sec 4-1 (08)',
+                    studentReflection: 'Felt confident during PR, but need to expand my counter-arguments for Q2.',
+                    timestamp: 'Today, 09:15 AM',
+                    level: 'O',
+                    topicKey: 'topic1',
+                    topicTitle: '2024 Nov Day 1: Youth & Skate Park Recreation',
+                    scoreTotal: 26,
+                    scoreResponse: 9,
+                    scoreDelivery: 5,
+                    scoreInteraction: 12,
+                    wpm: 132,
+                    fillers: 1,
+                    peelMet: 4,
+                    transcriptPlanned: 'I would strongly recommend skateboarding for young people in Singapore. Firstly, as seen in the video clip, it promotes physical endurance and balance. Secondly, skaters encourage one another when attempting complex tricks, fostering resilience and peer bonding in community parks.',
+                    transcriptQ1: 'If I were to design a youth recreational zone, I would combine an active sports facility with covered study hubs. This provides a balance between physical activity and group academic discussions.',
+                    transcriptQ2: 'While Singaporean youths face busy academic schedules, leisure time remains vital for stress relief and holistic mental well-being.',
+                    teacherNotes: 'Excellent vocabulary control. Excellent PEEL structure in Part 1.'
+                },
+                {
+                    id: 'sub_demo_2',
+                    studentName: 'Siti Nurhaliza',
+                    studentClass: 'Sec 4-3 (21)',
+                    studentReflection: 'Need to reduce filler words like "um" when nervous.',
+                    timestamp: 'Yesterday, 02:40 PM',
+                    level: 'O',
+                    topicKey: 'topic2',
+                    topicTitle: '2024 Nov Day 2: Nature Spots & Changi Jewel',
+                    scoreTotal: 21,
+                    scoreResponse: 7,
+                    scoreDelivery: 3,
+                    scoreInteraction: 11,
+                    wpm: 110,
+                    fillers: 5,
+                    peelMet: 3,
+                    transcriptPlanned: 'Um, I think indoor nature spots like Changi Jewel are very good because they give people a place to relax in green surroundings without worrying about hot weather.',
+                    transcriptQ1: 'Schools can organize nature walks or outdoor workshops to encourage teenagers to appreciate biodiversity in Singapore.',
+                    transcriptQ2: 'Young people can participate in beach clean-ups and reduce single-use plastics to protect the environment.',
+                    teacherNotes: 'Pacing is clear but work on eliminating hesitations.'
+                }
+            ];
+
+            saveStoredSubmissions(demoData);
+            fetchTeacherSubmissions();
+            showToast('Sample class submissions loaded!');
+        }
+
+        function copySummaryToClipboard() {
+            const text = `GCE Paper 4 Oral Assessment Diagnostic Summary:\nCandidate: ${candidateName || 'N/A'} (${candidateClass || 'N/A'})\nTotal Marks: ${document.getElementById('scoreTotal').innerText}/30\nSyllabus Level: ${currentLevel === 'O' ? 'O-Level (1184)' : 'N(A)-Level (1190)'}\nTopic: ${EXAM_TOPICS[currentTopicKey]?.title}`;
+            navigator.clipboard ? navigator.clipboard.writeText(text) : document.execCommand('copy');
+            showToast('Summary copied to clipboard!');
+        }
+
+        function initApp() {
+            loadTopic();
+            updateTeacherBadge();
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initApp);
+        } else {
+            initApp();
+        }
+
+        // Global Function Bindings
+        window.setLevel = setLevel;
+        window.loadTopic = loadTopic;
+        window.resetQuestionState = resetQuestionState;
+        window.switchTab = switchTab;
+        window.selectQuestion = selectQuestion;
+        window.startPrepTimer = startPrepTimer;
+        window.togglePlannedRecord = togglePlannedRecord;
+        window.toggleQuestionRecord = toggleQuestionRecord;
+        window.unlockQuestion2 = unlockQuestion2;
+        window.advanceQuestion = advanceQuestion;
+        window.toggleVideoUrlInput = toggleVideoUrlInput;
+        window.applyCustomVideoUrl = applyCustomVideoUrl;
+        window.updateCandidateInfo = updateCandidateInfo;
+        window.generateFullReport = generateFullReport;
+        window.loadDemoReport = loadDemoReport;
+        window.renderRadarChart = renderRadarChart;
+        window.showToast = showToast;
+        window.openSubmitModal = openSubmitModal;
+        window.closeSubmitModal = closeSubmitModal;
+        window.handleStudentSubmit = handleStudentSubmit;
+        window.openTeacherModal = openTeacherModal;
+        window.closeTeacherModal = closeTeacherModal;
+        window.fetchTeacherSubmissions = fetchTeacherSubmissions;
+        window.filterTeacherSubmissions = filterTeacherSubmissions;
+        window.toggleSubmissionDetails = toggleSubmissionDetails;
+        window.saveTeacherNote = saveTeacherNote;
+        window.deleteSubmission = deleteSubmission;
+        window.clearAllTeacherSubmissions = clearAllTeacherSubmissions;
+        window.seedDemoSubmissions = seedDemoSubmissions;
+        window.copySummaryToClipboard = copySummaryToClipboard;
+    </script>
+</body>
+</html>
