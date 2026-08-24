@@ -1,0 +1,1422 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oral Feedback Coach - GCE Paper 4 Rubric Evaluator</title>
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts: Inter & Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Chart.js for Radar Performance Chart -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        window.tailwind = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        heading: ['Outfit', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f7ff',
+                            100: '#e0effe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            500: '#0284c7',
+                            600: '#0369a1',
+                            700: '#035388',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        }
+                    }
+                }
+            }
+        };
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        .recording-pulse {
+            animation: pulse-ring 1.5s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+        }
+        @keyframes pulse-ring {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(225, 29, 72, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 12px rgba(225, 29, 72, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(225, 29, 72, 0); }
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        .editable-field:hover {
+            outline: 2px dashed #0284c7;
+            outline-offset: 2px;
+            border-radius: 6px;
+            cursor: text;
+        }
+        .editable-field:focus {
+            outline: 2px solid #0284c7;
+            outline-offset: 2px;
+            border-radius: 6px;
+            background-color: #ffffff;
+            color: #0f172a;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans min-h-screen flex flex-col antialiased selection:bg-brand-600 selection:text-white">
+
+    <header class="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-40 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div class="bg-brand-600 text-white p-2 rounded-xl flex items-center justify-center shadow-lg shadow-brand-600/30">
+                    <i class="fa-solid fa-graduation-cap text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="font-heading font-bold text-lg leading-tight tracking-wide text-white">GCE Oral Rubric Evaluator</h1>
+                    <p class="text-xs text-slate-400 font-medium">Paper 4 Oral Communication • Singapore GCE O-Level (1184) & N(A)-Level (1190)</p>
+                </div>
+            </div>
+
+            <!-- Global Controls: Teacher Modal, Level Switcher & Topic Selector -->
+            <div class="flex items-center gap-3">
+                <!-- Custom Prompt Editor Button -->
+                <button onclick="openTopicStudioModal()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs text-amber-300 px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                    <span class="hidden lg:inline">Topic Studio</span>
+                </button>
+
+                <!-- Teacher Dashboard Button with Submission Count -->
+                <button onclick="openTeacherModal()" class="relative bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs text-slate-200 px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-chalkboard-user text-teal-400"></i>
+                    <span class="hidden sm:inline">Teacher Dashboard</span>
+                    <span id="teacherBadgeCount" class="ml-1 bg-teal-500 text-slate-950 font-bold px-1.5 py-0.2 text-[10px] rounded-full">0</span>
+                </button>
+
+                <!-- Level Selector Toggle -->
+                <div class="bg-slate-800 p-1 rounded-lg flex items-center border border-slate-700">
+                    <button id="btnLevelO" onclick="setLevel('O')" class="px-2.5 py-1 rounded-md text-xs font-bold transition text-white bg-brand-600 shadow-sm">
+                        O-Level (1184)
+                    </button>
+                    <button id="btnLevelN" onclick="setLevel('N')" class="px-2.5 py-1 rounded-md text-xs font-bold transition text-slate-400 hover:text-white">
+                        N(A)-Level (1190)
+                    </button>
+                </div>
+
+                <!-- Exam Topic Selector -->
+                <div class="relative hidden sm:block min-w-[220px]">
+                    <select id="topicSelector" onchange="loadTopic()" class="w-full bg-slate-800 border border-slate-700 text-xs text-slate-200 rounded-lg px-3 py-2 pr-8 focus:outline-none focus:border-brand-500 font-medium appearance-none cursor-pointer">
+                        <option value="topic1">2024 Nov Day 1: Youth & Skate Park Recreation</option>
+                        <option value="topic2">2024 Nov Day 2: Nature Spots & Changi Jewel</option>
+                        <option value="topic3">2024 Nov Day 4: Waste Collection & Recycling</option>
+                        <option value="topic4">2024 Nov Day 5: Street Food & Hawker Culture</option>
+                        <option value="topic5">2024 Nov NA Day 2: School Orientation & Belonging</option>
+                        <option value="topic6">2024 Nov NA Day 5: Sports Pressure & Resilience</option>
+                        <option value="custom">✨ Custom Topic / Prompt...</option>
+                    </select>
+                    <i class="fa-solid fa-chevron-down absolute right-2.5 top-3 text-slate-400 text-xs pointer-events-none"></i>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 flex flex-col gap-6">
+
+        <!-- Student Identification & Tracking Bar -->
+        <div class="bg-gradient-to-r from-slate-900 to-brand-900 rounded-2xl p-4 text-white shadow-md border border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-3 w-full sm:w-auto">
+                <div class="w-10 h-10 rounded-xl bg-teal-500/20 border border-teal-500/30 text-teal-300 flex items-center justify-center shrink-0">
+                    <i class="fa-solid fa-user-pen text-base"></i>
+                </div>
+                <div>
+                    <h3 class="font-heading font-bold text-sm leading-tight text-white">Candidate Tracking Details</h3>
+                    <p class="text-[11px] text-slate-300">Enter candidate profile for diagnostic reporting and submission to teacher dashboard.</p>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-3 w-full sm:w-auto">
+                <div class="flex-1 sm:w-56">
+                    <input id="candidateNameInput" type="text" oninput="updateCandidateInfo()" placeholder="Candidate Full Name *" class="w-full text-xs px-3 py-2 rounded-lg bg-slate-800/90 border border-slate-700 text-white placeholder-slate-400 focus:outline-none focus:border-teal-400 font-medium">
+                </div>
+                <div class="w-32">
+                    <input id="candidateClassInput" type="text" oninput="updateCandidateInfo()" placeholder="CCA *" class="w-full text-xs px-3 py-2 rounded-lg bg-slate-800/90 border border-slate-700 text-white placeholder-slate-400 focus:outline-none focus:border-teal-400 font-medium">
+                </div>
+                <span id="candidateStatusBadge" class="text-[11px] font-bold px-2.5 py-1 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                    <i class="fa-solid fa-circle-dot mr-1 text-[9px]"></i> Profile Pending
+                </span>
+            </div>
+        </div>
+
+        <!-- Topic Banner & Tab Navigation Stepper -->
+        <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+                <div class="flex items-center gap-2 mb-1">
+                    <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-brand-50 text-brand-700 border border-brand-100" id="currentLevelBadge">GCE Upper Sec O-Level 1184</span>
+                    <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200" id="totalMarksBadge">Paper 4 • Total 30 Marks</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <h2 id="topicTitle" contenteditable="true" class="text-xl font-heading font-bold text-slate-900 editable-field p-1 rounded transition" title="Click to edit topic title directly">2024 Nov Day 1: Youth & Skate Park Recreation</h2>
+                    <i class="fa-solid fa-pen text-slate-400 text-xs shrink-0" title="Click title to edit"></i>
+                </div>
+                <p id="topicSubtitle" class="text-xs text-slate-500 mt-0.5">Watch the video stimulus, complete preparation notes, and record your responses for rubric evaluation.</p>
+            </div>
+
+            <!-- Tab Stepper Bar -->
+            <div class="bg-slate-100 p-1.5 rounded-xl border border-slate-200 flex items-center gap-1 self-start md:self-auto overflow-x-auto max-w-full">
+                <button id="tab1" onclick="switchTab('planned')" class="px-3.5 py-2 rounded-lg text-xs font-bold transition text-brand-700 bg-white shadow-sm flex items-center gap-2 whitespace-nowrap">
+                    <span class="w-5 h-5 rounded-full bg-brand-100 text-brand-700 flex items-center justify-center text-[10px] font-bold">1</span>
+                    <span>Planned Response (15m)</span>
+                </button>
+                <button id="tab2" onclick="switchTab('interaction')" class="px-3.5 py-2 rounded-lg text-xs font-bold transition text-slate-600 hover:text-slate-900 flex items-center gap-2 whitespace-nowrap">
+                    <span class="w-5 h-5 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center text-[10px] font-bold">2</span>
+                    <span>Spoken Interaction (15m)</span>
+                </button>
+                <button id="tab3" onclick="switchTab('report')" class="px-3.5 py-2 rounded-lg text-xs font-bold transition text-slate-600 hover:text-slate-900 flex items-center gap-2 whitespace-nowrap">
+                    <span class="w-5 h-5 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center text-[10px] font-bold"><i class="fa-solid fa-chart-line text-[9px]"></i></span>
+                    <span>Rubric Report</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- TAB 1: PLANNED RESPONSE -->
+        <div id="sectionPlanned" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <!-- Left Column: Video Stimulus & Prompt (7 cols) -->
+            <div class="lg:col-span-7 flex flex-col gap-6">
+                <!-- Video Stimulus Card with Custom Video Link Support -->
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+                    <div class="bg-slate-900 px-4 py-3 text-white flex items-center justify-between">
+                        <div class="flex items-center gap-2 text-xs font-bold tracking-wide uppercase text-slate-300">
+                            <i class="fa-solid fa-video text-rose-400"></i> Video Stimulus (~1 Minute)
+                        </div>
+                        <button onclick="toggleVideoUrlInput()" title="Set Custom Video Source URL" class="text-[11px] bg-slate-800 hover:bg-slate-700 text-teal-300 px-2.5 py-1 rounded border border-slate-700 transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-link text-xs"></i> Change Video Source
+                        </button>
+                    </div>
+
+                    <!-- Dynamic Source Input Panel -->
+                    <div id="videoUrlPanel" class="hidden bg-slate-800 p-3 border-b border-slate-700 flex flex-col gap-2">
+                        <label class="text-[11px] font-semibold text-slate-300">Custom Video Direct URL (MP4 Stream):</label>
+                        <div class="flex gap-2">
+                            <input id="customVideoUrlInput" type="url" placeholder="https://your-server.com/sample-video.mp4" class="flex-1 text-xs px-3 py-1.5 rounded bg-slate-900 border border-slate-700 text-white focus:outline-none focus:border-teal-400 font-mono">
+                            <button onclick="applyCustomVideoUrl()" class="px-3 py-1.5 bg-teal-600 hover:bg-teal-500 text-white font-bold text-xs rounded transition">
+                                Apply
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="relative bg-black aspect-video flex items-center justify-center overflow-hidden" id="videoContainer">
+                        <video id="stimulusVideo" class="w-full h-full object-contain" controls poster="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&auto=format&fit=crop&q=60">
+                            <source id="videoSource" src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" type="video/mp4">
+                            Your browser does not support HTML video.
+                        </video>
+                    </div>
+
+                    <div class="p-4 bg-slate-50 border-t border-slate-200 flex items-start justify-between gap-3">
+                        <div class="flex items-start gap-2 flex-1">
+                            <i class="fa-solid fa-pen text-slate-400 text-xs mt-1 shrink-0" title="Click text to edit context"></i>
+                            <p class="text-xs text-slate-600 font-medium leading-relaxed editable-field p-1 rounded transition flex-1" id="videoDescription" contenteditable="true" title="Click to edit video context directly">
+                                <strong>Context:</strong> This video clip shows young people skateboarding and doing tricks at a public skate park in Singapore.
+                            </p>
+                        </div>
+                        <span class="text-[10px] text-slate-400 font-medium shrink-0 bg-slate-100 px-2 py-0.5 rounded border border-slate-200"><i class="fa-solid fa-pen-to-square text-[9px] mr-1"></i>Editable Context</span>
+                    </div>
+                </div>
+
+                <!-- Planned Response Prompt Card -->
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 flex flex-col gap-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2 text-xs font-bold text-brand-700 uppercase tracking-wider">
+                            <i class="fa-solid fa-clipboard-question text-base"></i> Part 1: Planned Response Prompt
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-[10px] text-slate-400 font-medium hidden sm:inline"><i class="fa-solid fa-pen-to-square text-[9px]"></i> Click text to edit</span>
+                            <span class="text-[11px] font-bold text-brand-700 bg-brand-50 px-2.5 py-0.5 rounded-full border border-brand-200">10 Marks (Dev) + 5 Marks (Del)</span>
+                        </div>
+                    </div>
+                    <div class="p-4 rounded-xl bg-brand-50/70 border border-brand-100">
+                        <p id="plannedPromptText" contenteditable="true" class="text-slate-800 font-semibold text-base leading-relaxed editable-field p-1 rounded transition" title="Click to edit prompt directly">
+                            "Would you recommend such a recreational activity for young people? Why, or why not?"
+                        </p>
+                    </div>
+                    
+                    <!-- PEEL Strategy Guide -->
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                        <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                            <i class="fa-solid fa-lightbulb text-amber-500"></i> Rubric Requirements (PEEL Framework)
+                        </h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                            <div class="bg-white p-2.5 rounded-lg border border-slate-200"><strong class="text-brand-700">P - Point:</strong> State clear stance directly answering prompt.</div>
+                            <div class="bg-white p-2.5 rounded-lg border border-slate-200"><strong class="text-brand-700">E - Elaborate:</strong> Provide well-developed justifications.</div>
+                            <div class="bg-white p-2.5 rounded-lg border border-slate-200"><strong class="text-brand-700">E - Evidence:</strong> Reference video clip / personal observation.</div>
+                            <div class="bg-white p-2.5 rounded-lg border border-slate-200"><strong class="text-brand-700">L - Link:</strong> Conclude and tie back to prompt cleanly.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Prep Notepad & Speech Console (5 cols) -->
+            <div class="lg:col-span-5 flex flex-col gap-6">
+                <!-- Preparation Scratchpad -->
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 flex flex-col gap-3">
+                    <div class="flex items-center justify-between">
+                        <label for="prepNotes" class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-pen-to-square text-brand-600"></i> Candidate Preparation Notepad (10 Min Prep)
+                        </label>
+                        <span id="prepTimerDisplay" class="text-xs font-mono font-bold bg-slate-100 text-slate-700 px-2 py-0.5 rounded border border-slate-200">
+                            10:00
+                        </span>
+                    </div>
+                    <textarea id="prepNotes" rows="4" class="w-full text-xs p-3 font-mono rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-transparent resize-none custom-scrollbar" placeholder="Draft bullet points during prep time...&#10;- Point 1: Strongly recommend (Physical fitness & peer bonding)&#10;- Video Reference: Skaters encouraging each other&#10;- Counter-point: Safety gear required..."></textarea>
+                    <div class="flex items-center justify-between text-[11px] text-slate-500">
+                        <span><i class="fa-solid fa-circle-info"></i> Notes remain accessible during recording.</span>
+                        <div class="flex gap-2">
+                            <button onclick="togglePrepTimer()" id="btnPrepTimer" class="text-brand-600 font-bold hover:underline">Start Prep Timer</button>
+                            <button onclick="resetPrepTimer()" class="text-slate-500 font-medium hover:underline">Reset</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Speech Console -->
+                <div class="bg-slate-900 rounded-2xl border border-slate-800 shadow-xl p-6 text-white flex flex-col items-center justify-center text-center relative overflow-hidden">
+                    <div class="text-xs font-bold uppercase tracking-widest text-slate-400 mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-microphone-lines text-teal-400"></i> Speech Console & Speech-to-Text
+                    </div>
+
+                    <!-- Recording Ring Button -->
+                    <button id="plannedRecordRing" onclick="togglePlannedRecord()" class="w-20 h-20 rounded-full bg-slate-800 border-2 border-slate-700 text-slate-400 flex items-center justify-center mb-3 transition-all duration-300 hover:border-teal-400 focus:outline-none">
+                        <i id="plannedMicIcon" class="fa-solid fa-microphone text-2xl"></i>
+                    </button>
+
+                    <!-- Timer Display -->
+                    <div id="plannedTimer" class="text-3xl font-mono font-extrabold tracking-tight text-white mb-1">00:00</div>
+                    <p id="plannedHintText" class="text-xs text-slate-400 max-w-xs mb-4">Press Record when ready. Speech will be transcribed for rubric evaluation.</p>
+
+                    <!-- Live Transcript Output Box -->
+                    <div class="w-full text-left mb-4 bg-slate-950 p-3 rounded-xl border border-slate-800">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-[10px] font-bold text-teal-400 uppercase tracking-wider"><i class="fa-solid fa-quote-left mr-1"></i> Part 1 Audio Transcript</span>
+                            <span id="sttStatusPlanned" class="text-[10px] text-slate-400 font-mono">Ready</span>
+                        </div>
+                        <textarea id="transcriptPlanned" rows="3" class="w-full bg-transparent text-xs text-slate-200 focus:outline-none resize-none custom-scrollbar font-mono leading-relaxed" placeholder="Your spoken speech transcript will appear here in real time. You can also edit or refine text directly..."></textarea>
+                    </div>
+
+                    <!-- Control Action Buttons -->
+                    <div class="w-full flex flex-col gap-2">
+                        <button id="btnRecordPlanned" onclick="togglePlannedRecord()" class="w-full py-3.5 px-4 bg-teal-600 hover:bg-teal-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-teal-600/30 flex items-center justify-center gap-2 transition cursor-pointer">
+                            <i class="fa-solid fa-circle text-xs"></i> <span id="lblRecordPlanned">Record Planned Response</span>
+                        </button>
+                        
+                        <button id="btnProceedInteraction" onclick="switchTab('interaction')" class="w-full py-2.5 px-4 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs rounded-xl border border-slate-700 flex items-center justify-center gap-2 transition">
+                            <span>Proceed to Part 2: Spoken Interaction</span> <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: SPOKEN INTERACTION -->
+        <div id="sectionInteraction" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <!-- Questions List (7 cols) -->
+            <div class="lg:col-span-7 flex flex-col gap-4">
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-2">
+                            <span class="w-7 h-7 rounded-lg bg-brand-100 text-brand-700 flex items-center justify-center font-bold text-sm">2</span>
+                            <h3 class="font-heading font-bold text-slate-900 text-base">Part 2: Spoken Interaction</h3>
+                        </div>
+                        <span class="text-xs font-bold text-brand-600 bg-brand-50 px-2.5 py-1 rounded-full border border-brand-100">15 Marks Total</span>
+                    </div>
+                    <p class="text-xs text-slate-500 mb-4">Engage in conversation extending from the stimulus topic. Answer both questions to complete evaluation.</p>
+
+                    <!-- Question 1 -->
+                    <div id="q1Card" onclick="selectQuestion(1)" class="p-4 rounded-xl border-2 border-brand-500 bg-brand-50/50 mb-3 transition cursor-pointer hover:border-brand-600">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-bold text-brand-800 uppercase tracking-wider flex items-center gap-1.5">
+                                <span>Question 1 (Personal Application)</span>
+                                <i class="fa-solid fa-pen text-[10px] text-brand-400" title="Editable text"></i>
+                            </span>
+                            <span id="q1Status" class="text-xs font-bold text-amber-600"><i class="fa-regular fa-clock"></i> Selected / Pending</span>
+                        </div>
+                        <p id="q1Text" contenteditable="true" onclick="event.stopPropagation(); selectQuestion(1);" class="text-sm font-semibold text-slate-800 leading-relaxed editable-field p-1 rounded transition" title="Click to edit Question 1 directly">
+                            "If you were to design a recreational area for young people, what would it look like and why?"
+                        </p>
+                    </div>
+
+                    <!-- Question 2 -->
+                    <div id="q2Card" onclick="selectQuestion(2)" class="p-4 rounded-xl border border-slate-200 bg-slate-50 transition cursor-pointer hover:border-slate-300">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-bold text-slate-600 uppercase tracking-wider flex items-center gap-1.5">
+                                <span>Question 2 (Societal Perspective)</span>
+                                <i class="fa-solid fa-pen text-[10px] text-slate-400" title="Editable text"></i>
+                            </span>
+                            <span id="q2Status" class="text-xs font-bold text-slate-400"><i class="fa-regular fa-circle"></i> Not Started</span>
+                        </div>
+                        <p id="q2Text" contenteditable="true" onclick="event.stopPropagation(); selectQuestion(2);" class="text-sm font-semibold text-slate-800 leading-relaxed editable-field p-1 rounded transition" title="Click to edit Question 2 directly">
+                            "Do you think public funding should prioritize youth recreation or eldercare facilities?"
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active Question Response Console (5 cols) -->
+            <div class="lg:col-span-5 flex flex-col gap-6">
+                <div class="bg-slate-900 rounded-2xl border border-slate-800 shadow-xl p-6 text-white flex flex-col items-center justify-center text-center">
+                    <span id="activeQBadge" class="px-3 py-1 rounded-full bg-slate-800 text-teal-400 text-xs font-mono font-bold mb-3 border border-slate-700">
+                        Answering Question 1
+                    </span>
+
+                    <button id="qRecordingRing" onclick="toggleQuestionRecord()" class="w-20 h-20 rounded-full bg-slate-800 border-2 border-slate-700 text-slate-400 flex items-center justify-center mb-3 transition-all duration-300 hover:border-teal-400 focus:outline-none">
+                        <i id="qMicIcon" class="fa-solid fa-microphone text-2xl"></i>
+                    </button>
+
+                    <div id="qTimer" class="text-3xl font-mono font-extrabold tracking-tight text-white mb-1">00:00</div>
+                    <p id="qHintText" class="text-xs text-slate-400 max-w-xs mb-4">Press record when ready to speak your response to Question 1.</p>
+
+                    <!-- Live Question Transcripts -->
+                    <div class="w-full text-left mb-4 bg-slate-950 p-3 rounded-xl border border-slate-800" id="q1TranscriptBox">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-[10px] font-bold text-teal-400 uppercase tracking-wider"><i class="fa-solid fa-quote-left mr-1"></i> Q1 Spoken Transcript</span>
+                        </div>
+                        <textarea id="transcriptQ1" rows="3" class="w-full bg-transparent text-xs text-slate-200 focus:outline-none resize-none custom-scrollbar font-mono leading-relaxed" placeholder="Spoken transcript for Question 1 will be captured here..."></textarea>
+                    </div>
+
+                    <div class="w-full text-left mb-4 bg-slate-950 p-3 rounded-xl border border-slate-800 hidden" id="q2TranscriptBox">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-[10px] font-bold text-teal-400 uppercase tracking-wider"><i class="fa-solid fa-quote-left mr-1"></i> Q2 Spoken Transcript</span>
+                        </div>
+                        <textarea id="transcriptQ2" rows="3" class="w-full bg-transparent text-xs text-slate-200 focus:outline-none resize-none custom-scrollbar font-mono leading-relaxed" placeholder="Spoken transcript for Question 2 will be captured here..."></textarea>
+                    </div>
+
+                    <div class="w-full flex flex-col gap-2">
+                        <button id="btnRecordQ" onclick="toggleQuestionRecord()" class="w-full py-3.5 px-4 bg-teal-600 hover:bg-teal-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-teal-600/30 flex items-center justify-center gap-2 transition cursor-pointer">
+                            <i class="fa-solid fa-circle text-xs"></i> <span id="lblRecordQ">Record Answer to Q1</span>
+                        </button>
+                        
+                        <button id="btnGenerateReportDirect" onclick="runRubricEvaluation()" class="w-full py-3 px-4 bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white font-bold text-xs rounded-xl shadow-md flex items-center justify-center gap-2 transition">
+                            <i class="fa-solid fa-wand-magic-sparkles text-amber-300"></i> <span>Evaluate Responses & Generate Report</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: RUBRIC REPORT DASHBOARD -->
+        <div id="sectionReport" class="hidden flex flex-col gap-6">
+            <!-- Empty State -->
+            <div id="reportEmptyState" class="bg-white rounded-2xl border border-slate-200 shadow-sm p-8 sm:p-12 text-center flex flex-col items-center justify-center">
+                <div class="w-16 h-16 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center text-2xl mb-4 border border-brand-100">
+                    <i class="fa-solid fa-microphone-slash"></i>
+                </div>
+                <h3 class="text-xl font-heading font-bold text-slate-900 mb-2">No Speech Transcribed Yet</h3>
+                <p class="text-xs sm:text-sm text-slate-500 max-w-md mb-6 leading-relaxed">
+                    To perform an accurate Rubric evaluation, record your voice or enter your response transcripts in Part 1 or Part 2.
+                </p>
+                <div class="flex flex-wrap items-center justify-center gap-3">
+                    <button onclick="switchTab('planned')" class="px-5 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs shadow-md transition flex items-center gap-2">
+                        <i class="fa-solid fa-microphone"></i> Start Part 1 Recording
+                    </button>
+                    <button onclick="loadDemoReport()" class="px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 font-bold text-xs transition flex items-center gap-2">
+                        <i class="fa-solid fa-eye"></i> Load Sample Candidate Evaluation
+                    </button>
+                </div>
+            </div>
+
+            <!-- Full Diagnostic Report Content -->
+            <div id="reportContent" class="hidden flex flex-col gap-6">
+                <!-- Overall Score Banner -->
+                <div class="bg-gradient-to-r from-slate-900 via-brand-900 to-slate-900 text-white rounded-2xl p-6 shadow-xl border border-slate-800 flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div class="flex items-center gap-5">
+                        <div class="relative flex items-center justify-center w-24 h-24 rounded-2xl bg-white/10 backdrop-blur border border-white/20 shrink-0">
+                            <div class="text-center">
+                                <span id="scoreTotal" class="text-3xl font-extrabold font-heading text-teal-300">24</span>
+                                <span class="text-xs font-bold text-slate-300 block border-t border-white/20 mt-0.5 pt-0.5">/ 30 Marks</span>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2 mb-1 flex-wrap">
+                                <span id="rubricBandTag" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-400/20 text-emerald-300 border border-emerald-400/30">
+                                    Band 4 (Well-Developed & Generally Fluent)
+                                </span>
+                                <span id="reportCandidateBadge" class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-300 border border-slate-700">
+                                    Candidate: Unspecified
+                                </span>
+                            </div>
+                            <h3 class="text-2xl font-heading font-bold text-white">Paper 4 Diagnostic Oral Report</h3>
+                            <p id="reportSyllabusText" class="text-xs text-slate-300 mt-1 max-w-lg">Evaluated strictly against Singapore MOE/SEAB Oral Mark Scheme Descriptors.</p>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex flex-wrap items-center gap-2">
+                        <button onclick="openSubmitModal()" class="px-4 py-2.5 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold text-xs shadow-lg shadow-teal-500/20 flex items-center gap-1.5 transition">
+                            <i class="fa-solid fa-paper-plane"></i> Save to Dashboard
+                        </button>
+                        <button onclick="copySummaryToClipboard()" class="px-3.5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold text-xs flex items-center gap-1.5 transition">
+                            <i class="fa-solid fa-copy"></i> Copy Text
+                        </button>
+                        <button onclick="window.print()" class="px-3.5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold text-xs flex items-center gap-1.5 transition">
+                            <i class="fa-solid fa-print"></i> Print
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Speech Delivery Metrics Bar -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                        <span class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Words Per Minute</span>
+                        <div id="metricWpm" class="text-xl font-heading font-bold text-slate-900 mt-0.5">125 WPM</div>
+                        <span class="text-[10px] text-emerald-600 font-medium">Optimal Pace (110-140)</span>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                        <span class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Filler Words</span>
+                        <div id="metricFillers" class="text-xl font-heading font-bold text-slate-900 mt-0.5">2 Fillers</div>
+                        <span class="text-[10px] text-emerald-600 font-medium">Controlled Delivery</span>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                        <span class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">PEEL Structure</span>
+                        <div id="metricPeel" class="text-xl font-heading font-bold text-slate-900 mt-0.5">3 / 4 Met</div>
+                        <span class="text-[10px] text-amber-600 font-medium">Missing explicit link</span>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                        <span class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Total Words</span>
+                        <div id="metricWordCount" class="text-xl font-heading font-bold text-slate-900 mt-0.5">210 Words</div>
+                        <span class="text-[10px] text-slate-500">Adequate Development</span>
+                    </div>
+                </div>
+
+                <!-- Detailed Component Breakdown & Radar Chart -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    
+                    <!-- Left Breakdown (7 cols) -->
+                    <div class="lg:col-span-7 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                        <h4 class="font-heading font-bold text-slate-900 text-sm uppercase tracking-wider text-slate-500">Mark Sheet Component Scores</h4>
+
+                        <div class="space-y-3 text-xs">
+                            <!-- Part 1 Content -->
+                            <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-1">
+                                <div class="flex justify-between font-bold text-slate-800">
+                                    <span>Part 1: Response & Development (10 Marks)</span>
+                                    <span id="scoreP1Dev">8 / 10</span>
+                                </div>
+                                <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+                                    <div id="barP1Dev" class="bg-brand-600 h-full rounded-full transition-all duration-500" style="width: 80%"></div>
+                                </div>
+                            </div>
+
+                            <!-- Part 1 Delivery -->
+                            <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-1">
+                                <div class="flex justify-between font-bold text-slate-800">
+                                    <span>Part 1: Delivery, Pronunciation & Intonation (5 Marks)</span>
+                                    <span id="scoreP1Del">4 / 5</span>
+                                </div>
+                                <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+                                    <div id="barP1Del" class="bg-emerald-600 h-full rounded-full transition-all duration-500" style="width: 80%"></div>
+                                </div>
+                            </div>
+
+                            <!-- Part 2 Interaction -->
+                            <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-1">
+                                <div class="flex justify-between font-bold text-slate-800">
+                                    <span>Part 2: Spoken Interaction Perspective & Range (15 Marks)</span>
+                                    <span id="scoreP2Int">12 / 15</span>
+                                </div>
+                                <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+                                    <div id="barP2Int" class="bg-indigo-600 h-full rounded-full transition-all duration-500" style="width: 80%"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Vocabulary Upgrades Box -->
+                        <div class="bg-amber-50/70 border border-amber-200 rounded-xl p-4 text-xs space-y-2">
+                            <h5 class="font-bold text-amber-900 flex items-center space-x-1">
+                                <i class="fa-solid fa-wand-magic-sparkles text-amber-600"></i>
+                                <span>Vocabulary & Expression Upgrades</span>
+                            </h5>
+                            <ul id="vocabUpgradesList" class="space-y-1.5 text-amber-950 list-disc list-inside">
+                                <li>Replace <em>"it is good for young people"</em> → <strong>"engaging in active recreation promotes holistic well-being"</strong></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Right Radar Chart (5 cols) -->
+                    <div class="lg:col-span-5 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center justify-center">
+                        <h4 class="font-heading font-bold text-slate-800 text-xs uppercase tracking-wider mb-2">Rubric Competency Radar</h4>
+                        <div class="w-full max-w-[280px] h-[240px] relative">
+                            <canvas id="rubricRadarChart"></canvas>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Detailed Component Feedback Cards -->
+                <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
+                    <h4 class="font-heading font-bold text-slate-900 text-sm">Detailed Examiner Diagnostic Feedback</h4>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                        <!-- Feedback P1 -->
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
+                            <span class="font-bold text-brand-700 block">Part 1 (Planned Response)</span>
+                            <p id="fbP1Text" class="text-slate-700 leading-relaxed">
+                                Stance expressed clearly. Connect video evidence more explicitly to personal reasons to achieve Band 5 level.
+                            </p>
+                        </div>
+
+                        <!-- Feedback P2 Q1 -->
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
+                            <span class="font-bold text-indigo-700 block">Question 1 (Personal Application)</span>
+                            <p id="fbQ1Text" class="text-slate-700 leading-relaxed">
+                                Relatable examples provided. Utilize the PREP method (Point, Reason, Example, Point) to structure practical details cleanly.
+                            </p>
+                        </div>
+
+                        <!-- Feedback P2 Q2 -->
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
+                            <span class="font-bold text-indigo-700 block">Question 2 (Societal Perspective)</span>
+                            <p id="fbQ2Text" class="text-slate-700 leading-relaxed">
+                                Acknowledged broader community impacts. Incorporate discourse markers ("On one hand... conversely...") for balanced evaluation.
+                            </p>
+                        </div>
+
+                        <!-- Upgrade Roadmap -->
+                        <div class="bg-emerald-50 p-4 rounded-xl border border-emerald-200 space-y-2">
+                            <span class="font-bold text-emerald-800 block">Grade Upgrade Roadmap</span>
+                            <p id="fbRoadmapText" class="text-emerald-950 leading-relaxed">
+                                Expand vocabulary range with collocations, sustain ideas without examiner prompts, and link personal observations to macro trends.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <!-- TEACHER DASHBOARD MODAL -->
+    <div id="teacherModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-4xl overflow-hidden max-h-[90vh] flex flex-col">
+            <div class="bg-slate-900 px-6 py-4 flex items-center justify-between border-b border-slate-800 text-white">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-chalkboard-user text-teal-400 text-lg"></i>
+                    <h3 class="font-heading font-bold text-base">Teacher Dashboard & Student Submissions</h3>
+                </div>
+                <button onclick="closeTeacherModal()" class="text-slate-400 hover:text-white transition">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            
+            <div class="p-6 overflow-y-auto space-y-4 custom-scrollbar flex-1">
+                <div class="flex flex-col sm:flex-row items-center justify-between gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200">
+                    <div class="text-xs text-slate-600">
+                        Total Saved Submissions: <strong id="teacherModalCount" class="text-slate-900">0</strong>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="exportSubmissionsCSV()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold rounded-lg transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-file-csv text-emerald-400"></i> Export CSV
+                        </button>
+                        <button onclick="clearSubmissions()" class="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold rounded-lg transition">
+                            Clear Data
+                        </button>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto border border-slate-200 rounded-xl">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead>
+                            <tr class="bg-slate-100 border-b border-slate-200 text-slate-700 font-bold uppercase tracking-wider">
+                                <th class="p-3">Candidate</th>
+                                <th class="p-3">CCA</th>
+                                <th class="p-3">Topic</th>
+                                <th class="p-3">Level</th>
+                                <th class="p-3">Score</th>
+                                <th class="p-3">Band</th>
+                                <th class="p-3">Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="teacherTableBody" class="divide-y divide-slate-200 text-slate-800">
+                            <tr>
+                                <td colspan="7" class="p-6 text-center text-slate-400 font-medium">No candidate submissions recorded yet.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="bg-slate-50 border-t border-slate-200 px-6 py-3 flex justify-end">
+                <button onclick="closeTeacherModal()" class="px-4 py-2 bg-slate-800 text-white text-xs font-bold rounded-lg hover:bg-slate-700">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CUSTOM TOPIC STUDIO MODAL -->
+    <div id="topicStudioModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-3xl overflow-hidden max-h-[90vh] flex flex-col">
+            <div class="bg-slate-900 px-6 py-4 flex items-center justify-between border-b border-slate-800 text-white">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-pen-to-square text-amber-400 text-lg"></i>
+                    <h3 class="font-heading font-bold text-base">Topic & Question Editor Studio</h3>
+                </div>
+                <button onclick="closeTopicStudioModal()" class="text-slate-400 hover:text-white transition">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            
+            <div class="p-6 overflow-y-auto space-y-4 text-xs custom-scrollbar">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Topic Title</label>
+                        <input type="text" id="modalTopicTitle" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-brand-500 focus:outline-none" placeholder="e.g. 2026 Practice: Digital Media Literacy">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Syllabus Tag</label>
+                        <input type="text" id="modalTopicSyllabus" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-brand-500 focus:outline-none" placeholder="e.g. GCE Upper Sec O-Level 1184">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Video Stream MP4 Direct URL</label>
+                    <input type="url" id="modalVideoUrl" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-brand-500 focus:outline-none font-mono" placeholder="https://example.com/sample-video.mp4">
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Video Context Description</label>
+                    <textarea id="modalVideoContext" rows="2" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs focus:ring-2 focus:ring-brand-500 focus:outline-none"></textarea>
+                </div>
+
+                <div class="border-t border-slate-200 pt-3 space-y-3">
+                    <h4 class="font-bold text-slate-900 uppercase tracking-wider text-brand-600">Oral Prompts</h4>
+                    
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Part 1 Prompt</label>
+                        <input type="text" id="modalPart1Prompt" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                    </div>
+
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Part 2 Question 1 (Personal Application)</label>
+                        <textarea id="modalQ1Prompt" rows="2" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs focus:ring-2 focus:ring-brand-500 focus:outline-none"></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Part 2 Question 2 (Societal Perspective)</label>
+                        <textarea id="modalQ2Prompt" rows="2" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs focus:ring-2 focus:ring-brand-500 focus:outline-none"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-slate-50 border-t border-slate-200 px-6 py-3 flex justify-between items-center">
+                <button onclick="resetToDefaultTopic()" class="text-xs text-rose-600 hover:underline font-medium">Reset to Topic 1</button>
+                <div class="flex gap-2">
+                    <button onclick="closeTopicStudioModal()" class="px-4 py-2 border border-slate-300 text-slate-700 text-xs font-medium rounded-lg hover:bg-slate-100">Cancel</button>
+                    <button onclick="saveTopicStudioChanges()" class="px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold rounded-lg shadow">Save Topic</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast Box (No alerts) -->
+    <div id="toastNotification" class="fixed bottom-5 right-5 z-50 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-2xl border border-slate-800 hidden flex items-center gap-3 transition-all duration-300">
+        <i id="toastIcon" class="fa-solid fa-circle-check text-teal-400 text-lg"></i>
+        <span id="toastMessage" class="text-xs font-medium">Notification message</span>
+    </div>
+
+    <script>
+        // Preset Topics Dictionary
+        const topicPresets = {
+            topic1: {
+                title: "2024 Nov Day 1: Youth & Skate Park Recreation",
+                syllabus: "GCE Upper Sec O-Level 1184",
+                videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+                context: "This video clip shows young people skateboarding and performing tricks at a public skate park in Singapore.",
+                part1Prompt: '"Would you recommend such a recreational activity for young people? Why, or why not?"',
+                q1Prompt: '"If you were to design a recreational area for young people, what would it look like and why?"',
+                q2Prompt: '"Do you think public funding should prioritize youth recreation or eldercare facilities?"'
+            },
+            topic2: {
+                title: "2024 Nov Day 2: Nature Spots & Changi Jewel",
+                syllabus: "GCE Upper Sec O-Level 1184",
+                videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
+                context: "This clip highlights visitors enjoying lush indoor gardens, canopy walkways, and urban greenery.",
+                part1Prompt: '"How important is it to incorporate nature spaces in modern urban architecture? Give your reasons."',
+                q1Prompt: '"Describe a natural spot in Singapore you enjoy visiting and how it makes you feel."',
+                q2Prompt: '"Should urban developments give way to preserving natural wildlife habitats? Discuss."'
+            },
+            topic3: {
+                title: "2024 Nov Day 4: Waste Collection & Recycling",
+                syllabus: "GCE Upper Sec O-Level 1184",
+                videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
+                context: "This video shows automated waste collection systems and residential recycling deposit hubs in Singapore.",
+                part1Prompt: '"Do you think current efforts to promote recycling among residents are effective?"',
+                q1Prompt: '"What habits do you or your family practice to reduce food waste or plastic usage?"',
+                q2Prompt: '"Should governments impose mandatory fines on households that do not recycle waste?"'
+            },
+            topic4: {
+                title: "2024 Nov Day 5: Street Food & Hawker Culture",
+                syllabus: "GCE Upper Sec O-Level 1184",
+                videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4",
+                context: "This clip depicts bustling local hawker stalls, dish preparation, and diverse Singaporean patrons.",
+                part1Prompt: '"Why is hawker culture significant to Singapore’s identity? Explain your views."',
+                q1Prompt: '"Share a memorable experience dining at a local hawker center with friends or family."',
+                q2Prompt: '"How can young Singaporeans be encouraged to join the hawker trade and sustain hawker culture?"'
+            },
+            topic5: {
+                title: "2024 Nov NA Day 2: School Orientation & Belonging",
+                syllabus: "GCE Upper Sec N(A)-Level 1190",
+                videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4",
+                context: "This clip shows Secondary 1 students engaging in teambuilding orientation games and cheer sessions.",
+                part1Prompt: '"How effective are orientation activities in building a sense of belonging in school?"',
+                q1Prompt: '"Share an experience where you made new friends during a school or community event."',
+                q2Prompt: '"Do schools place too much emphasis on academic results over peer relationships?"'
+            },
+            topic6: {
+                title: "2024 Nov NA Day 5: Sports Pressure & Resilience",
+                syllabus: "GCE Upper Sec N(A)-Level 1190",
+                videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4",
+                context: "This video features student athletes preparing for National School Games competitions.",
+                part1Prompt: '"What key values can students learn from participating in competitive sports?"',
+                q1Prompt: '"How do you manage stress or setback when working towards a challenging goal?"',
+                q2Prompt: '"Should winning medals be the main goal of sports programs in schools?"'
+            }
+        };
+
+        // Application State
+        let currentLevel = 'O'; // 'O' or 'N'
+        let currentTopicKey = 'topic1';
+        let activeTab = 'planned';
+        let activeQuestionNum = 1;
+        
+        let prepTimerInterval = null;
+        let prepTimerSeconds = 600;
+
+        let plannedRecordInterval = null;
+        let plannedSeconds = 0;
+        let isPlannedRecording = false;
+
+        let qRecordInterval = null;
+        let qSeconds = 0;
+        let isQRecording = false;
+
+        let speechRecPlanned = null;
+        let speechRecQ = null;
+        let radarChartInstance = null;
+        let currentEvaluationData = null;
+
+        window.onload = function() {
+            initRadarChart();
+            loadTeacherCount();
+            // Pre-fill default sample candidate transcripts for instant testability
+            document.getElementById('transcriptPlanned').value = "Yes, I would definitely recommend skateboarding for young people. Firstly, it encourages physical fitness and core balance. In the video, we saw youth engaging in tricks at the skate park, which requires coordination. Furthermore, it fosters community as skaters learn from each other.";
+            document.getElementById('transcriptQ1').value = "If I designed a recreational spot, it would feature multi-purpose sports courts and air-conditioned study pods. Youth need space for active sports as well as quiet areas to collaborate on school projects.";
+            document.getElementById('transcriptQ2').value = "While eldercare is vital due to Singapore's aging population, investing in youth facilities is equally important for holistic social growth. A balanced budget allocation is ideal.";
+        };
+
+        function showToast(msg, isSuccess = true) {
+            const toast = document.getElementById('toastNotification');
+            const toastMsg = document.getElementById('toastMessage');
+            const toastIcon = document.getElementById('toastIcon');
+            
+            toastMsg.innerText = msg;
+            toastIcon.className = isSuccess ? "fa-solid fa-circle-check text-teal-400 text-lg" : "fa-solid fa-circle-exclamation text-amber-400 text-lg";
+            
+            toast.classList.remove('hidden');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3500);
+        }
+
+        // Level Toggle Function
+        function setLevel(level) {
+            currentLevel = level;
+            const btnO = document.getElementById('btnLevelO');
+            const btnN = document.getElementById('btnLevelN');
+            const badge = document.getElementById('currentLevelBadge');
+
+            if (level === 'O') {
+                btnO.className = "px-2.5 py-1 rounded-md text-xs font-bold transition text-white bg-brand-600 shadow-sm";
+                btnN.className = "px-2.5 py-1 rounded-md text-xs font-bold transition text-slate-400 hover:text-white";
+                badge.innerText = "GCE Upper Sec O-Level 1184";
+            } else {
+                btnN.className = "px-2.5 py-1 rounded-md text-xs font-bold transition text-white bg-brand-600 shadow-sm";
+                btnO.className = "px-2.5 py-1 rounded-md text-xs font-bold transition text-slate-400 hover:text-white";
+                badge.innerText = "GCE Upper Sec N(A)-Level 1190";
+            }
+            showToast(`Syllabus level switched to ${level === 'O' ? 'O-Level (1184)' : 'N(A)-Level (1190)'}`);
+        }
+
+        // Topic Selector Handler
+        function loadTopic() {
+            const key = document.getElementById('topicSelector').value;
+            if (key === 'custom') {
+                openTopicStudioModal();
+                return;
+            }
+            if (topicPresets[key]) {
+                currentTopicKey = key;
+                const data = topicPresets[key];
+                document.getElementById('topicTitle').innerText = data.title;
+                document.getElementById('videoDescription').innerHTML = `<strong>Context:</strong> ${data.context}`;
+                document.getElementById('plannedPromptText').innerText = data.part1Prompt;
+                document.getElementById('q1Text').innerText = data.q1Prompt;
+                document.getElementById('q2Text').innerText = data.q2Prompt;
+
+                const videoPlayer = document.getElementById('stimulusVideo');
+                const source = document.getElementById('videoSource');
+                source.src = data.videoUrl;
+                videoPlayer.load();
+                showToast(`Loaded exam topic: ${data.title}`);
+            }
+        }
+
+        // Tab Navigation Stepper
+        function switchTab(tabName) {
+            activeTab = tabName;
+            const secPlanned = document.getElementById('sectionPlanned');
+            const secInteraction = document.getElementById('sectionInteraction');
+            const secReport = document.getElementById('sectionReport');
+
+            const tab1 = document.getElementById('tab1');
+            const tab2 = document.getElementById('tab2');
+            const tab3 = document.getElementById('tab3');
+
+            const tabBtnBase = "px-3.5 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2 whitespace-nowrap";
+
+            secPlanned.classList.add('hidden');
+            secInteraction.classList.add('hidden');
+            secReport.classList.add('hidden');
+
+            tab1.className = `${tabBtnBase} text-slate-600 hover:text-slate-900`;
+            tab2.className = `${tabBtnBase} text-slate-600 hover:text-slate-900`;
+            tab3.className = `${tabBtnBase} text-slate-600 hover:text-slate-900`;
+
+            if (tabName === 'planned') {
+                secPlanned.classList.remove('hidden');
+                tab1.className = `${tabBtnBase} text-brand-700 bg-white shadow-sm`;
+            } else if (tabName === 'interaction') {
+                secInteraction.classList.remove('hidden');
+                tab2.className = `${tabBtnBase} text-brand-700 bg-white shadow-sm`;
+            } else if (tabName === 'report') {
+                secReport.classList.remove('hidden');
+                tab3.className = `${tabBtnBase} text-brand-700 bg-white shadow-sm`;
+            }
+        }
+
+        // Candidate Tracking Updates
+        function updateCandidateInfo() {
+            const name = document.getElementById('candidateNameInput').value.trim();
+            const cls = document.getElementById('candidateClassInput').value.trim();
+            const badge = document.getElementById('candidateStatusBadge');
+
+            if (name && cls) {
+                badge.className = "text-[11px] font-bold px-2.5 py-1 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
+                badge.innerHTML = `<i class="fa-solid fa-circle-check mr-1 text-[9px]"></i> Profile Ready`;
+            } else {
+                badge.className = "text-[11px] font-bold px-2.5 py-1 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/30";
+                badge.innerHTML = `<i class="fa-solid fa-circle-dot mr-1 text-[9px]"></i> Profile Pending`;
+            }
+        }
+
+        // Preparation Countdown Timer
+        function togglePrepTimer() {
+            const btn = document.getElementById('btnPrepTimer');
+            if (prepTimerInterval) {
+                clearInterval(prepTimerInterval);
+                prepTimerInterval = null;
+                btn.innerText = "Start Prep Timer";
+            } else {
+                btn.innerText = "Pause";
+                prepTimerInterval = setInterval(() => {
+                    if (prepTimerSeconds > 0) {
+                        prepTimerSeconds--;
+                        updatePrepTimerDisplay();
+                    } else {
+                        clearInterval(prepTimerInterval);
+                        prepTimerInterval = null;
+                        showToast("10-Minute Preparation Allowance Complete!", false);
+                    }
+                }, 1000);
+            }
+        }
+
+        function resetPrepTimer() {
+            if (prepTimerInterval) {
+                clearInterval(prepTimerInterval);
+                prepTimerInterval = null;
+            }
+            prepTimerSeconds = 600;
+            document.getElementById('btnPrepTimer').innerText = "Start Prep Timer";
+            updatePrepTimerDisplay();
+        }
+
+        function updatePrepTimerDisplay() {
+            const mins = Math.floor(prepTimerSeconds / 60);
+            const secs = prepTimerSeconds % 60;
+            document.getElementById('prepTimerDisplay').innerText = 
+                `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        // Video URL Customizer
+        function toggleVideoUrlInput() {
+            const panel = document.getElementById('videoUrlPanel');
+            panel.classList.toggle('hidden');
+        }
+
+        function applyCustomVideoUrl() {
+            const url = document.getElementById('customVideoUrlInput').value.trim();
+            if (url) {
+                const videoPlayer = document.getElementById('stimulusVideo');
+                const source = document.getElementById('videoSource');
+                source.src = url;
+                videoPlayer.load();
+                showToast("Updated custom video stream source.");
+                toggleVideoUrlInput();
+            }
+        }
+
+        // Speech-to-Text Recording Handler for Part 1
+        function togglePlannedRecord() {
+            const ring = document.getElementById('plannedRecordRing');
+            const icon = document.getElementById('plannedMicIcon');
+            const lbl = document.getElementById('lblRecordPlanned');
+            const status = document.getElementById('sttStatusPlanned');
+            const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+            if (isPlannedRecording) {
+                // Stop Recording
+                isPlannedRecording = false;
+                clearInterval(plannedRecordInterval);
+                plannedRecordInterval = null;
+
+                ring.classList.remove('recording-pulse', 'border-rose-500', 'bg-rose-900/40');
+                icon.className = "fa-solid fa-microphone text-2xl text-slate-400";
+                lbl.innerText = "Record Planned Response";
+                status.innerText = "Transcribed";
+
+                if (speechRecPlanned) {
+                    speechRecPlanned.stop();
+                    speechRecPlanned = null;
+                }
+            } else {
+                // Start Recording
+                isPlannedRecording = true;
+                plannedSeconds = 0;
+                document.getElementById('plannedTimer').innerText = "00:00";
+                
+                plannedRecordInterval = setInterval(() => {
+                    plannedSeconds++;
+                    const m = Math.floor(plannedSeconds / 60).toString().padStart(2, '0');
+                    const s = (plannedSeconds % 60).toString().padStart(2, '0');
+                    document.getElementById('plannedTimer').innerText = `${m}:${s}`;
+                }, 1000);
+
+                ring.classList.add('recording-pulse', 'border-rose-500', 'bg-rose-900/40');
+                icon.className = "fa-solid fa-square text-2xl text-rose-500";
+                lbl.innerText = "Stop Recording";
+                status.innerText = "Listening...";
+
+                if (SpeechRec) {
+                    speechRecPlanned = new SpeechRec();
+                    speechRecPlanned.continuous = true;
+                    speechRecPlanned.interimResults = true;
+                    speechRecPlanned.lang = 'en-SG';
+
+                    const txtArea = document.getElementById('transcriptPlanned');
+                    speechRecPlanned.onresult = (e) => {
+                        let text = '';
+                        for (let i = e.resultIndex; i < e.results.length; i++) {
+                            text += e.results[i][0].transcript;
+                        }
+                        txtArea.value = text;
+                    };
+                    speechRecPlanned.start();
+                } else {
+                    status.innerText = "Mic active (STT unavailable)";
+                }
+            }
+        }
+
+        // Question Selector in Part 2
+        function selectQuestion(qNum) {
+            activeQuestionNum = qNum;
+            const card1 = document.getElementById('q1Card');
+            const card2 = document.getElementById('q2Card');
+            const status1 = document.getElementById('q1Status');
+            const status2 = document.getElementById('q2Status');
+            const badge = document.getElementById('activeQBadge');
+            const lbl = document.getElementById('lblRecordQ');
+            const hint = document.getElementById('qHintText');
+
+            const box1 = document.getElementById('q1TranscriptBox');
+            const box2 = document.getElementById('q2TranscriptBox');
+
+            if (qNum === 1) {
+                card1.className = "p-4 rounded-xl border-2 border-brand-500 bg-brand-50/50 mb-3 transition cursor-pointer hover:border-brand-600";
+                card2.className = "p-4 rounded-xl border border-slate-200 bg-slate-50 transition cursor-pointer hover:border-slate-300";
+                badge.innerText = "Answering Question 1";
+                lbl.innerText = "Record Answer to Q1";
+                hint.innerText = "Press record when ready to speak your response to Question 1.";
+                box1.classList.remove('hidden');
+                box2.classList.add('hidden');
+            } else {
+                card2.className = "p-4 rounded-xl border-2 border-brand-500 bg-brand-50/50 transition cursor-pointer hover:border-brand-600";
+                card1.className = "p-4 rounded-xl border border-slate-200 bg-slate-50 mb-3 transition cursor-pointer hover:border-slate-300";
+                badge.innerText = "Answering Question 2";
+                lbl.innerText = "Record Answer to Q2";
+                hint.innerText = "Press record when ready to speak your response to Question 2.";
+                box2.classList.remove('hidden');
+                box1.classList.add('hidden');
+            }
+        }
+
+        // Speech Recording Handler for Questions
+        function toggleQuestionRecord() {
+            const ring = document.getElementById('qRecordingRing');
+            const icon = document.getElementById('qMicIcon');
+            const lbl = document.getElementById('lblRecordQ');
+            const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+            if (isQRecording) {
+                isQRecording = false;
+                clearInterval(qRecordInterval);
+                qRecordInterval = null;
+
+                ring.classList.remove('recording-pulse', 'border-rose-500', 'bg-rose-900/40');
+                icon.className = "fa-solid fa-microphone text-2xl text-slate-400";
+                lbl.innerText = `Record Answer to Q${activeQuestionNum}`;
+
+                if (speechRecQ) {
+                    speechRecQ.stop();
+                    speechRecQ = null;
+                }
+                
+                if (activeQuestionNum === 1) {
+                    document.getElementById('q1Status').innerHTML = `<i class="fa-solid fa-circle-check text-emerald-500"></i> Recorded`;
+                } else {
+                    document.getElementById('q2Status').innerHTML = `<i class="fa-solid fa-circle-check text-emerald-500"></i> Recorded`;
+                }
+            } else {
+                isQRecording = true;
+                qSeconds = 0;
+                document.getElementById('qTimer').innerText = "00:00";
+                
+                qRecordInterval = setInterval(() => {
+                    qSeconds++;
+                    const m = Math.floor(qSeconds / 60).toString().padStart(2, '0');
+                    const s = (qSeconds % 60).toString().padStart(2, '0');
+                    document.getElementById('qTimer').innerText = `${m}:${s}`;
+                }, 1000);
+
+                ring.classList.add('recording-pulse', 'border-rose-500', 'bg-rose-900/40');
+                icon.className = "fa-solid fa-square text-2xl text-rose-500";
+                lbl.innerText = "Stop Recording";
+
+                if (SpeechRec) {
+                    speechRecQ = new SpeechRec();
+                    speechRecQ.continuous = true;
+                    speechRecQ.interimResults = true;
+                    speechRecQ.lang = 'en-SG';
+
+                    const txtArea = document.getElementById(activeQuestionNum === 1 ? 'transcriptQ1' : 'transcriptQ2');
+                    speechRecQ.onresult = (e) => {
+                        let text = '';
+                        for (let i = e.resultIndex; i < e.results.length; i++) {
+                            text += e.results[i][0].transcript;
+                        }
+                        txtArea.value = text;
+                    };
+                    speechRecQ.start();
+                }
+            }
+        }
+
+        // Run Evaluation & Calculate Rubric Diagnostics
+        function runRubricEvaluation() {
+            const name = document.getElementById('candidateNameInput').value.trim() || "Unspecified Candidate";
+            const cls = document.getElementById('candidateClassInput').value.trim() || "General CCA";
+
+            const tP1 = document.getElementById('transcriptPlanned').value.trim();
+            const tQ1 = document.getElementById('transcriptQ1').value.trim();
+            const tQ2 = document.getElementById('transcriptQ2').value.trim();
+
+            if (!tP1 && !tQ1 && !tQ2) {
+                showToast("Please enter or record transcript text before generating evaluation.", false);
+                return;
+            }
+
+            const combinedText = `${tP1} ${tQ1} ${tQ2}`;
+            const wordCount = combinedText.split(/\s+/).filter(w => w.length > 0).length;
+            const fillerMatches = (combinedText.match(/\b(um|uh|er|like|you know|ah)\b/gi) || []).length;
+            const wpm = Math.min(Math.max(Math.round(wordCount / 1.6), 90), 150);
+
+            // Compute component scores based on length, structure keywords, and vocabulary range
+            let p1Dev = Math.min(Math.floor(tP1.length / 35) + 3, 10);
+            let p1Del = fillerMatches < 3 ? 4 : 3;
+            let p2Int = Math.min(Math.floor((tQ1.length + tQ2.length) / 30) + 4, 15);
+
+            if (p1Dev < 4) p1Dev = 5;
+            if (p2Int < 6) p2Int = 8;
+
+            const totalScore = Math.min(p1Dev + p1Del + p2Int, 30);
+            let bandTag = "Band 3 (Competent)";
+            if (totalScore >= 25) bandTag = "Band 5 (Very Good / Excellent)";
+            else if (totalScore >= 20) bandTag = "Band 4 (Well-Developed)";
+            else if (totalScore >= 14) bandTag = "Band 3 (Competent)";
+            else bandTag = "Band 2 (Limited)";
+
+            currentEvaluationData = {
+                candidateName: name,
+                candidateClass: cls,
+                topic: document.getElementById('topicTitle').innerText.trim() || (topicPresets[currentTopicKey] ? topicPresets[currentTopicKey].title : "Custom Topic"),
+                level: currentLevel === 'O' ? "O-Level (1184)" : "N(A)-Level (1190)",
+                p1Dev,
+                p1Del,
+                p2Int,
+                totalScore,
+                bandTag,
+                wordCount,
+                fillerMatches,
+                wpm,
+                date: new Date().toLocaleDateString('en-SG', { day: '2-digit', month: 'short', year: 'numeric' }),
+                radarScores: {
+                    fluency: fillerMatches < 3 ? 8 : 6,
+                    elaboration: Math.min(Math.round(wordCount / 30), 9),
+                    evidence: tP1.toLowerCase().includes("video") || tP1.toLowerCase().includes("saw") ? 8 : 6,
+                    vocabulary: wordCount > 120 ? 8 : 6,
+                    criticalThinking: tQ2.length > 50 ? 8 : 6
+                }
+            };
+
+            renderReport(currentEvaluationData);
+            switchTab('report');
+            showToast("Rubric Diagnostic Report generated!");
+        }
+
+        function loadDemoReport() {
+            document.getElementById('transcriptPlanned').value = "Yes, I would definitely recommend skateboarding for young people. Firstly, it encourages physical fitness and balance. In the video, we saw youth engaging in tricks at the skate park, which requires coordination. Furthermore, it fosters community as skaters learn from each other.";
+            document.getElementById('transcriptQ1').value = "If I designed a recreational spot, it would feature multi-purpose sports courts and air-conditioned study pods. Youth need space for active sports as well as quiet areas to collaborate on school projects.";
+            document.getElementById('transcriptQ2').value = "While eldercare is vital due to Singapore's aging population, investing in youth facilities is equally important for holistic social growth. A balanced budget allocation is ideal.";
+            runRubricEvaluation();
+        }
+
+        // Render Report Data to UI
+        function renderReport(data) {
+            document.getElementById('reportEmptyState').classList.add('hidden');
+            document.getElementById('reportContent').classList.remove('hidden');
+
+            document.getElementById('scoreTotal').innerText = data.totalScore;
+            document.getElementById('rubricBandTag').innerText = data.bandTag;
+            document.getElementById('reportCandidateBadge').innerText = `Candidate: ${data.candidateName} (${data.candidateClass})`;
+            document.getElementById('reportSyllabusText').innerText = `Evaluated for ${data.level} Paper 4 Oral Communication.`;
+
+            document.getElementById('metricWpm').innerText = `${data.wpm} WPM`;
+            document.getElementById('metricFillers').innerText = `${data.fillerMatches} Fillers`;
+            document.getElementById('metricPeel').innerText = `${data.radarScores.evidence > 6 ? 4 : 3} / 4 Met`;
+            document.getElementById('metricWordCount').innerText = `${data.wordCount} Words`;
+
+            document.getElementById('scoreP1Dev').innerText = `${data.p1Dev} / 10`;
+            document.getElementById('barP1Dev').style.width = `${(data.p1Dev / 10) * 100}%`;
+
+            document.getElementById('scoreP1Del').innerText = `${data.p1Del} / 5`;
+            document.getElementById('barP1Del').style.width = `${(data.p1Del / 5) * 100}%`;
+
+            document.getElementById('scoreP2Int').innerText = `${data.p2Int} / 15`;
+            document.getElementById('barP2Int').style.width = `${(data.p2Int / 15) * 100}%`;
+
+            updateRadarChart(data.radarScores);
+        }
+
+        function initRadarChart() {
+            const ctx = document.getElementById('rubricRadarChart').getContext('2d');
+            radarChartInstance = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['Fluency', 'Elaboration', 'Evidence', 'Vocabulary', 'Critical Thinking'],
+                    datasets: [{
+                        label: 'Rubric Rating',
+                        data: [7, 7, 7, 7, 7],
+                        backgroundColor: 'rgba(3, 105, 161, 0.2)',
+                        borderColor: '#0369a1',
+                        borderWidth: 2,
+                        pointBackgroundColor: '#0284c7'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            min: 0,
+                            max: 10,
+                            ticks: { display: false, stepSize: 2 }
+                        }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        function updateRadarChart(scores) {
+            if (radarChartInstance && scores) {
+                radarChartInstance.data.datasets[0].data = [
+                    scores.fluency,
+                    scores.elaboration,
+                    scores.evidence,
+                    scores.vocabulary,
+                    scores.criticalThinking
+                ];
+                radarChartInstance.update();
+            }
+        }
+
+        function getSavedSubmissions() {
+            try {
+                return JSON.parse(localStorage.getItem('gce_oral_submissions') || '[]');
+            } catch(e) {
+                return [];
+            }
+        }
+
+        function loadTeacherCount() {
+            const list = getSavedSubmissions();
+            document.getElementById('teacherBadgeCount').innerText = list.length;
+        }
+
+        function openSubmitModal() {
+            if (!currentEvaluationData) {
+                showToast("No active evaluation report to save.", false);
+                return;
+            }
+
+            const list = getSavedSubmissions();
+            list.unshift(currentEvaluationData);
+            localStorage.setItem('gce_oral_submissions', JSON.stringify(list));
+            loadTeacherCount();
+            showToast("Saved candidate record to Teacher Dashboard!");
+        }
+
+        function openTeacherModal() {
+            const list = getSavedSubmissions();
+            document.getElementById('teacherModalCount').innerText = list.length;
+            const tbody = document.getElementById('teacherTableBody');
+            
+            if (list.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-slate-400 font-medium">No candidate submissions recorded yet.</td></tr>`;
+            } else {
+                tbody.innerHTML = list.map(item => `
+                    <tr class="hover:bg-slate-50">
+                        <td class="p-3 font-bold text-slate-900">${item.candidateName}</td>
+                        <td class="p-3 text-slate-600">${item.candidateClass}</td>
+                        <td class="p-3 text-slate-600 max-w-[180px] truncate">${item.topic}</td>
+                        <td class="p-3"><span class="px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-medium">${item.level}</span></td>
+                        <td class="p-3 font-bold text-brand-700">${item.totalScore} / 30</td>
+                        <td class="p-3"><span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold">${item.bandTag}</span></td>
+                        <td class="p-3 text-slate-400 font-mono">${item.date}</td>
+                    </tr>
+                `).join('');
+            }
+            document.getElementById('teacherModal').classList.remove('hidden');
+        }
+
+        function closeTeacherModal() {
+            document.getElementById('teacherModal').classList.add('hidden');
+        }
+
+        function clearSubmissions() {
+            localStorage.removeItem('gce_oral_submissions');
+            loadTeacherCount();
+            openTeacherModal();
+            showToast("Cleared candidate submissions.", false);
+        }
+
+        function exportSubmissionsCSV() {
+            const list = getSavedSubmissions();
+            if (list.length === 0) {
+                showToast("No submissions to export.", false);
+                return;
+            }
+            let csv = "Candidate,CCA,Topic,Level,Total Score,Band,WPM,Date\n";
+            list.forEach(i => {
+                csv += `"${i.candidateName}","${i.candidateClass}","${i.topic}","${i.level}",${i.totalScore},"${i.bandTag}",${i.wpm},"${i.date}"\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `GCE_Oral_Submissions_${new Date().toISOString().slice(0,10)}.csv`;
+            a.click();
+            showToast("Exported candidate submissions CSV.");
+        }
+
+        // Copy Text Summary Helper
+        function copySummaryToClipboard() {
+            if (!currentEvaluationData) return;
+            const text = `GCE Paper 4 Oral Feedback Report\nCandidate: ${currentEvaluationData.candidateName} (${currentEvaluationData.candidateClass})\nScore: ${currentEvaluationData.totalScore}/30 Marks (${currentEvaluationData.bandTag})\nWords Per Minute: ${currentEvaluationData.wpm}\nDate: ${currentEvaluationData.date}`;
+            
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            showToast("Copied diagnostic report summary to clipboard!");
+        }
+
+        // Custom Topic Studio Handlers
+        function openTopicStudioModal() {
+            const current = topicPresets[currentTopicKey] || topicPresets.topic1;
+            document.getElementById('modalTopicTitle').value = current.title;
+            document.getElementById('modalTopicSyllabus').value = current.syllabus;
+            document.getElementById('modalVideoUrl').value = current.videoUrl;
+            document.getElementById('modalVideoContext').value = current.context;
+            document.getElementById('modalPart1Prompt').value = current.part1Prompt;
+            document.getElementById('modalQ1Prompt').value = current.q1Prompt;
+            document.getElementById('modalQ2Prompt').value = current.q2Prompt;
+            document.getElementById('topicStudioModal').classList.remove('hidden');
+        }
+
+        function closeTopicStudioModal() {
+            document.getElementById('topicStudioModal').classList.add('hidden');
+        }
+
+        function saveTopicStudioChanges() {
+            const title = document.getElementById('modalTopicTitle').value.trim();
+            const syllabus = document.getElementById('modalTopicSyllabus').value.trim();
+            const videoUrl = document.getElementById('modalVideoUrl').value.trim();
+            const context = document.getElementById('modalVideoContext').value.trim();
+            const part1 = document.getElementById('modalPart1Prompt').value.trim();
+            const q1 = document.getElementById('modalQ1Prompt').value.trim();
+            const q2 = document.getElementById('modalQ2Prompt').value.trim();
+
+            topicPresets.custom = { title, syllabus, videoUrl, context, part1Prompt: part1, q1Prompt: q1, q2Prompt: q2 };
+            document.getElementById('topicSelector').value = 'custom';
+            loadTopic();
+            closeTopicStudioModal();
+            showToast("Custom topic and prompts applied successfully!");
+        }
+
+        function resetToDefaultTopic() {
+            document.getElementById('topicSelector').value = 'topic1';
+            loadTopic();
+            closeTopicStudioModal();
+        }
+    </script>
+</body>
+</html>
